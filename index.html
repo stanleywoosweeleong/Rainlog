@@ -64,13 +64,22 @@
     border:none; cursor:pointer; transition:transform .15s; flex:none;
   }
   .add-btn:active{transform:scale(.9)}
+  .info-btn{
+    display:flex; align-items:center; justify-content:center; width:38px; height:38px;
+    background:none; color:var(--blue);
+    border:none; cursor:pointer; transition:transform .15s; flex:none;
+  }
+  .info-btn:active{transform:scale(.9)}
   .lang-btn{
-    background:var(--slate-100); color:var(--slate-600);
-    border:1px solid var(--slate-200); border-radius:9999px;
-    height:38px; padding:0 14px; font-size:13px; font-weight:900;
-    cursor:pointer; flex:none; transition:transform .15s;
+    background:none; color:var(--blue);
+    border:none; border-radius:9999px;
+    height:38px; padding:0 12px; font-size:14px; font-weight:900;
+    cursor:pointer; flex:none; transition:transform .15s, background .15s, color .15s;
   }
   .lang-btn:active{transform:scale(.9)}
+  .lang-btn.lang-active{
+    background:#eff6ff; color:var(--blue);
+  }
   main{max-width:760px; margin:0 auto; padding:14px}
   .attrib{
     position:fixed; right:14px; bottom:calc(10px + var(--safe-bottom));
@@ -195,18 +204,18 @@
   .card-body{padding:0 16px 14px}
   .stat-row{display:flex; gap:10px; margin-bottom:12px}
   .stat{
-    flex:1; border-radius:12px; padding:11px 14px;
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    flex:1; min-width:0; border-radius:12px; padding:11px 13px;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
   }
   .stat.rain{background:#eff6ff}
   .stat.days{background:#ecfdf5}
-  .stat .n{font-size:30px; font-weight:900; line-height:1; letter-spacing:-.02em; flex:none}
+  .stat .n{font-size:28px; font-weight:900; line-height:1; letter-spacing:-.02em; flex:none; white-space:nowrap}
   .stat.rain .n{color:var(--blue)}
   .stat.days .n{color:#047857}
-  .stat .l{font-size:15px; font-weight:900; line-height:1.25; min-width:0}
+  .stat .l{font-size:14px; font-weight:900; line-height:1.2; flex:1; min-width:0; word-break:keep-all}
   .stat.rain .l{color:#1d4ed8}
   .stat.days .l{color:#047857}
-  .stat .su{font-size:14px; font-weight:900; margin-left:2px; opacity:.85}
+  .stat .su{font-size:13px; font-weight:900; margin-left:1px; opacity:.85}
 
   /* 14-day mini bar strip */
   /* dry-spell tracker (flowering-induction signal) */
@@ -214,20 +223,21 @@
   .dry-cap{font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:#b45309; margin-bottom:9px}
   .dry-row{display:flex; gap:10px}
   .dry-stat{
-    flex:1; background:#fff; border:1px solid #fde68a; border-radius:10px;
-    padding:11px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+    flex:1; min-width:0; background:#fff; border:1px solid #fde68a; border-radius:10px;
+    padding:11px 13px; display:flex; align-items:center; justify-content:space-between; gap:6px;
   }
   .dry-stat.hot{background:#fff7ed; border-color:#fdba74}
-  .dry-n{font-size:30px; font-weight:900; line-height:1; color:#c2410c; letter-spacing:-.02em; flex:none}
+  .dry-n{font-size:28px; font-weight:900; line-height:1; color:#c2410c; letter-spacing:-.02em; flex:none; white-space:nowrap}
   .dry-stat.hot .dry-n{color:#ea580c}
-  .dry-u{font-size:14px; font-weight:900; margin-left:2px}
-  .dry-l{font-size:15px; font-weight:900; color:#92400e; line-height:1.25; min-width:0}
+  .dry-u{font-size:13px; font-weight:900; margin-left:1px}
+  .dry-l{font-size:14px; font-weight:900; color:#92400e; line-height:1.2; flex:1; min-width:0; word-break:keep-all}
   .dry-range{display:block; font-size:11px; font-weight:700; color:#b45309; letter-spacing:0; margin-top:2px}
 
   /* Delta-T trendline (historical spray-condition reference) */
   .dt-wrap{background:var(--slate-50); border:1px solid var(--slate-100); border-radius:12px; padding:10px 12px 8px; margin-bottom:12px}
-  .dt-cap{font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:var(--slate-600); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center}
-  .dt-now{font-weight:800; color:#4f46e5; text-transform:none; letter-spacing:0}
+  .dt-cap{font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.02em; color:var(--slate-600); margin-bottom:6px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  .dt-cap>span:first-child{flex:1; min-width:0; line-height:1.3}
+  .dt-now{font-weight:800; color:#4f46e5; text-transform:none; letter-spacing:0; flex:none; white-space:nowrap}
   .dt-svg{display:block; width:100%; height:70px}
   .dt-axis{display:flex; justify-content:space-between; font-size:9px; font-weight:700; color:var(--slate-400); margin-top:2px}
   .dt-ref{font-size:11px; font-weight:700; color:var(--slate-600); margin-top:7px; line-height:1.45}
@@ -273,6 +283,47 @@
   .empty .big{font-size:52px; margin-bottom:12px}
   .empty .t{font-size:17px; font-weight:900; color:var(--slate-600)}
   .empty .d{font-size:13px; font-weight:600; margin-top:6px}
+  /* full-screen user guide */
+  .guide-overlay{
+    position:fixed; left:0; right:0; bottom:0;
+    top:calc(76px + var(--safe-top));   /* start below the sticky header */
+    z-index:45;                          /* above attrib pill, below header (50) */
+    background:var(--slate-50);
+    display:flex; flex-direction:column;
+    transform:translateY(100%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    visibility:hidden;
+  }
+  .guide-overlay.on{transform:translateY(0); visibility:visible}
+  .guide-top{
+    flex:none; display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px 14px; background:#fff;
+    border-bottom:1px solid var(--slate-200);
+  }
+  .guide-top-title{font-size:19px; font-weight:900; color:var(--slate-900); letter-spacing:-.02em}
+  .guide-close{
+    width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    border:none; background:var(--slate-100); border-radius:9999px; color:var(--slate-600);
+    cursor:pointer; flex:none; transition:transform .15s;
+  }
+  .guide-close:active{transform:scale(.9)}
+  .guide-body{
+    flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:18px 18px calc(40px + var(--safe-bottom)); max-width:680px; width:100%; margin:0 auto;
+  }
+  .g-sec{margin-bottom:22px}
+  .g-h{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .g-ico{
+    width:30px; height:30px; flex:none; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .g-h h3{font-size:16px; font-weight:900; color:var(--slate-900); letter-spacing:-.01em}
+  .g-sec p{font-size:14px; font-weight:500; color:var(--slate-600); line-height:1.6; margin-left:40px}
+  .g-sec p b{font-weight:900; color:var(--slate-800)}
+  .g-intro{font-size:14px; font-weight:600; color:var(--slate-600); line-height:1.6; margin-bottom:24px;
+    background:#fff; border:1px solid var(--slate-200); border-radius:12px; padding:14px 16px}
+  .g-foot{font-size:12px; font-weight:600; color:var(--slate-400); line-height:1.6; text-align:center;
+    margin-top:8px; padding-top:18px; border-top:1px solid var(--slate-200)}
+
   .overlay{
     position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:1000;
     display:none; align-items:flex-end; justify-content:center;
@@ -320,12 +371,19 @@
     .overlay{align-items:center}
     .sheet{border-radius:22px; max-height:86vh}
   }
+  @media(max-width:430px){
+    .stat .n, .dry-n{font-size:23px}
+    .stat .l, .dry-l{font-size:13px; line-height:1.15}
+    .stat .su, .dry-u{font-size:11px}
+    .stat{padding:10px 11px; gap:5px}
+    .dry-stat{padding:10px 11px; gap:5px}
+  }
   @media(max-width:380px){
     .h-title h1{font-size:18px}
-    .stat .n, .dry-n{font-size:25px}
-    .stat .l, .dry-l{font-size:13px}
-    .stat{padding:10px 12px}
-    .dry-stat{padding:10px 12px}
+  }
+  @media(max-width:360px){
+    .stat .n, .dry-n{font-size:20px}
+    .stat .l, .dry-l{font-size:12px}
   }
 </style>
 </head>
@@ -350,12 +408,26 @@
     </div>
   </div>
   <div class="h-actions">
+    <button class="info-btn" id="infoBtn" onclick="openGuide()" title="使用说明 Guide" aria-label="使用说明 Guide">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.25"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.6" r="0.1" stroke-width="2.6"/></svg>
+    </button>
     <button class="add-btn" id="addBtn" onclick="openSheet()" title="添加地点 Add location" aria-label="添加地点 Add location">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
     <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
   </div>
 </header>
+
+<!-- full-screen user guide -->
+<div class="guide-overlay" id="guideOverlay">
+  <div class="guide-top">
+    <div class="guide-top-title" id="t-guide-title">使用说明</div>
+    <button class="guide-close" onclick="closeGuide()" aria-label="关闭 Close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="guide-body" id="guideBody"></div>
+</div>
 
 <main>
   <div class="thresh-toggle" id="threshToggle" style="display:none">
@@ -425,6 +497,12 @@ const THRESHKEY=NS+".thresh";
 // "Rainy day" threshold (mm). 1.0 = WMO/official standard; 2.5 = agricultural "useful rain".
 let RAIN_DAY_MM=parseFloat(localStorage.getItem(THRESHKEY))||1.0;
 let lang=localStorage.getItem(LANGKEY)||"zh";
+// Two-step language toggle: cycle order + each language's OWN label.
+// Add more languages here later, e.g. "ms":"BM", "ta":"த".
+const LANG_CYCLE=["zh","en"];
+const LANG_LBL={zh:"中", en:"EN"};
+let langActive=false;       // false = at rest; true = armed/cycling
+let langIdleTimer=null;     // resets to rest after inactivity
 let locations=loadLoc();
 let cache=loadCache();
 let bin=loadBin();
@@ -463,7 +541,28 @@ const T={
     partialNote:"* 该月数据不完整（仅部分日期）。",
     colMonth:"月份", colMonthMM:"月降雨量 (mm)", colMonthDays:"有雨天数",
     monthNames:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
-    week:["周日","周一","周二","周三","周四","周五","周六"]
+    week:["周日","周一","周二","周三","周四","周五","周六"],
+    guideTitle:"使用说明",
+    guide:{
+      intro:"雨量记录帮你查看果园近三个月的雨量历史，辅助榴莲管理。所有数据来自 Open-Meteo，查询后会保存在手机上，离线也能查看。",
+      foot:"数据来源：Open-Meteo（ERA5 网格数据，为大范围参考值，与果园实测雨量可能略有差异）。本应用仅提供历史记录，不作实时农事建议。",
+      sections:[
+        {icon:"➕",bg:"#dbeafe",fg:"#1d4ed8",h:"添加果园",
+         p:"点右上角的 <b>＋</b>，输入果园名称，再手动填入坐标或点「使用我的 GPS 定位」自动获取。保存后果园会显示在主页。"},
+        {icon:"🌧️",bg:"#dbeafe",fg:"#1d4ed8",h:"查询雨量",
+         p:"在果园卡片上点蓝色的 <b>查询雨量</b>。应用会取回近三个月加本月到昨天的每日雨量。查询一次后数据已保存，下次打开无需重新查询；想更新时再点「重新查询」即可。"},
+        {icon:"📊",bg:"#ecfdf5",fg:"#047857",h:"总降雨量与有雨天数",
+         p:"卡片顶部显示总雨量和有雨天数。<b>有雨天数标准</b>可切换：「官方 ≥1mm」是气象标准；「有效雨 ≥2.5mm」只算真正湿透土壤、对果树有用的雨。切换不需重新查询。"},
+        {icon:"🌥️",bg:"#fff7ed",fg:"#c2410c",h:"连续干旱（诱花参考）",
+         p:"显示三个月内<b>最长连旱</b>及<b>当前连旱</b>天数和日期。榴莲诱花需要一段干旱期，连旱天数可帮你判断诱花时机。干旱判定跟随上面的有雨标准。"},
+        {icon:"📈",bg:"#eef2ff",fg:"#4f46e5",h:"Delta-T 趋势",
+         p:"近 14 天每日中午 12–3 点的最高 Delta-T。Delta-T 反映空气蒸发强度，用来回看过去哪几天<b>适合喷药</b>。参考：2–8 适宜，8–10 临界，>10 太干蒸发快，<2 太潮湿。仅为历史记录。"},
+        {icon:"👆",bg:"#f1f5f9",fg:"#475569",h:"卡片操作",
+         p:"在果园卡片上<b>向左滑动</b>、点右上角的 <b>⋯</b>、或电脑上<b>右键点击</b>，可显示 分享 / 编辑 / 删除。删除的果园会进入回收站，可还原或永久删除。"},
+        {icon:"📤",bg:"#ecfdf5",fg:"#047857",h:"导出与分享",
+         p:"点 <b>导出 Excel</b> 把每日雨量、Delta-T 和按月汇总存成表格。<b>分享</b>会把整张卡片截成图片，通过手机分享菜单发到 WhatsApp 等。"}
+      ]
+    }
   },
   en:{
     title:"RainLog", sub:"LAST 3 MONTHS · 雨量记录",
@@ -493,13 +592,39 @@ const T={
     partialNote:"* Partial month (only some days available).",
     colMonth:"Month", colMonthMM:"Monthly rainfall (mm)", colMonthDays:"Rainy days",
     monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-    week:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+    week:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+    guideTitle:"User Guide",
+    guide:{
+      intro:"RainLog shows your orchard's rainfall history for the past three months to support durian management. All data comes from Open-Meteo and is saved on your phone after fetching, so it works offline too.",
+      foot:"Data: Open-Meteo (ERA5 gridded data — an area-wide reference that may differ slightly from your on-site gauge). This app is a historical record only, not live agronomic advice.",
+      sections:[
+        {icon:"➕",bg:"#dbeafe",fg:"#1d4ed8",h:"Add an orchard",
+         p:"Tap <b>＋</b> at the top right, enter a name, then type the coordinates or tap “Use my GPS location”. Saved orchards appear on the home screen."},
+        {icon:"🌧️",bg:"#dbeafe",fg:"#1d4ed8",h:"Get rainfall",
+         p:"Tap the blue <b>Get rainfall</b> on a card. It fetches daily rainfall for the last three full months plus this month to yesterday. Data is saved, so you needn't re-fetch each time — tap “Refresh” when you want to update."},
+        {icon:"📊",bg:"#ecfdf5",fg:"#047857",h:"Total & rainy days",
+         p:"The top of the card shows total rainfall and rainy days. The <b>Rainy-day basis</b> toggles between “Official ≥1mm” (the met standard) and “Useful ≥2.5mm” (only rain that truly wets the soil). Switching needs no re-fetch."},
+        {icon:"🌥️",bg:"#fff7ed",fg:"#c2410c",h:"Dry spell (flowering signal)",
+         p:"Shows the <b>longest</b> and <b>current</b> dry streaks in days, with dates. Durian flowering needs a dry stress period, so the streak count helps you judge induction timing. A “dry day” follows the rainy-day basis above."},
+        {icon:"📈",bg:"#eef2ff",fg:"#4f46e5",h:"Delta-T trend",
+         p:"The daily peak Delta-T (12–3pm) over the last 14 days. Delta-T reflects how evaporative the air is — useful for reviewing which past days were <b>good for spraying</b>. Reference: 2–8 good, 8–10 marginal, >10 too dry, <2 too humid. Historical only."},
+        {icon:"👆",bg:"#f1f5f9",fg:"#475569",h:"Card actions",
+         p:"<b>Swipe left</b>, tap the <b>⋯</b>, or <b>right-click</b> on desktop to reveal Share / Edit / Delete. Deleted orchards go to the recycle bin, where you can restore or permanently delete them."},
+        {icon:"📤",bg:"#ecfdf5",fg:"#047857",h:"Export & share",
+         p:"Tap <b>Export Excel</b> to save daily rainfall, Delta-T and a monthly summary as a spreadsheet. <b>Share</b> captures the whole card as an image and sends it via your phone's share sheet (e.g. WhatsApp)."}
+      ]
+    }
   }
 };
 function tr(k){return T[lang][k]}
 function applyLang(){
   document.documentElement.lang=lang;
-  document.getElementById("langBtn").textContent=lang==="zh"?"EN":"中";
+  // At rest, show the CURRENT language's own label. While armed/cycling, leave
+  // the hint label alone so a re-render doesn't overwrite it.
+  if(!langActive){
+    const lb=document.getElementById("langBtn");
+    if(lb) lb.textContent=LANG_LBL[lang];
+  }
   const s=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
   s("t-title",tr("title")); s("t-attrib",tr("attrib"));
   s("t-sheet-title",tr("sheetTitle")); s("t-sheet-desc",tr("sheetDesc"));
@@ -507,8 +632,54 @@ function applyLang(){
   s("t-cancel",tr("cancel")); s("t-save",tr("save"));
   s("t-bin-entry",tr("recycleTab")); s("t-bin-back",tr("backToAdd"));
   render(); renderBin(); updateBinCount();
+  if(document.getElementById("guideOverlay").classList.contains("on")) renderGuide();
 }
-function toggleLang(){lang=lang==="zh"?"en":"zh"; localStorage.setItem(LANGKEY,lang); applyLang()}
+function langRest(){           // return button to its resting state
+  langActive=false;
+  const lb=document.getElementById("langBtn");
+  if(lb){ lb.classList.remove("lang-active"); lb.textContent=LANG_LBL[lang]; }
+  if(langIdleTimer){ clearTimeout(langIdleTimer); langIdleTimer=null; }
+}
+function langArmIdleReset(){    // reset to rest after ~2.2s of no taps
+  if(langIdleTimer) clearTimeout(langIdleTimer);
+  langIdleTimer=setTimeout(langRest, 2200);
+}
+function toggleLang(){
+  const lb=document.getElementById("langBtn");
+  if(!langActive){
+    // First tap: ARM only — highlight + hint the next language, don't switch yet.
+    langActive=true;
+    const i=LANG_CYCLE.indexOf(lang);
+    const next=LANG_CYCLE[(i+1)%LANG_CYCLE.length];
+    if(lb){ lb.classList.add("lang-active"); lb.textContent="→ "+LANG_LBL[next]; }
+    langArmIdleReset();
+    return;
+  }
+  // Subsequent taps: CYCLE to the next language and apply it.
+  const i=LANG_CYCLE.indexOf(lang);
+  lang=LANG_CYCLE[(i+1)%LANG_CYCLE.length];
+  localStorage.setItem(LANGKEY,lang);
+  applyLang();                 // re-render UI in the new language (won't clobber label; langActive=true)
+  // update the hint to the NEXT-next language
+  const j=LANG_CYCLE.indexOf(lang);
+  const next=LANG_CYCLE[(j+1)%LANG_CYCLE.length];
+  if(lb){ lb.classList.add("lang-active"); lb.textContent="→ "+LANG_LBL[next]; }
+  langArmIdleReset();
+}
+
+/* ===== user guide ===== */
+function openGuide(){ renderGuide(); document.getElementById("guideOverlay").classList.add("on"); }
+function closeGuide(){ document.getElementById("guideOverlay").classList.remove("on"); }
+function renderGuide(){
+  document.getElementById("t-guide-title").textContent=tr("guideTitle");
+  const G=tr("guide");
+  const sections=G.sections.map(s=>`<div class="g-sec">
+    <div class="g-h"><div class="g-ico" style="background:${s.bg};color:${s.fg}">${s.icon}</div><h3>${s.h}</h3></div>
+    <p>${s.p}</p>
+  </div>`).join("");
+  document.getElementById("guideBody").innerHTML=
+    `<div class="g-intro">${G.intro}</div>${sections}<div class="g-foot">${G.foot}</div>`;
+}
 function render(){
   const list=document.getElementById("locList");
   if(!locations.length){
