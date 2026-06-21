@@ -5,7 +5,7 @@
        results in localStorage). Live weather must never be served stale by the SW.
      - App shell (HTML, JS libs, icons): cache-first, with background refresh.
 */
-const CACHE_VERSION = "rainlog-20260621-4";   // <-- change this string on each deploy
+const CACHE_VERSION = "rainlog-20260621-5";   // <-- change this string on each deploy
 
 const SHELL = [
   "./",
