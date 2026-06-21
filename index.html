@@ -31,7 +31,7 @@
     background:var(--slate-100); color:#000; margin:0; padding:0;
     -webkit-font-smoothing:antialiased; min-height:100vh;
     user-select:none; -webkit-user-select:none;
-    padding-bottom:calc(96px + var(--safe-bottom));
+    padding-bottom:calc(48px + var(--safe-bottom));
   }
   .tabular{font-variant-numeric:tabular-nums}
   header{
@@ -43,18 +43,12 @@
   }
   .h-left{display:flex; align-items:center; gap:14px; min-width:0}
   .icon-tile{
-    width:48px; height:48px; background:var(--blue); border-radius:16px;
-    display:flex; align-items:center; justify-content:center; position:relative;
-    box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
-    flex:none; cursor:pointer; transition:transform .15s;
+    width:34px; height:34px; background:var(--blue); border-radius:11px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+    flex:none;
   }
-  .icon-tile:active{transform:scale(.95)}
-  .icon-tile .badge{
-    position:absolute; bottom:-4px; right:-4px; width:20px; height:20px;
-    background:#facc15; border-radius:50%; display:flex; align-items:center;
-    justify-content:center; border:2px solid #fff;
-    box-shadow:0 1px 2px 0 rgba(0,0,0,.05);
-  }
+  .icon-tile img{width:34px; height:34px; border-radius:11px; display:block;}
   .h-title h1{
     font-size:20px; font-weight:900; letter-spacing:-.03em; line-height:1;
     color:var(--slate-900); margin:0; white-space:nowrap;
@@ -63,25 +57,68 @@
     font-size:11px; font-weight:700; color:var(--slate-400);
     margin-top:5px; text-transform:uppercase; letter-spacing:.02em;
   }
+  .h-actions{display:flex; align-items:center; gap:8px; flex:none}
+  .add-btn{
+    display:flex; align-items:center; justify-content:center; width:38px; height:38px;
+    background:none; color:var(--blue);
+    border:none; cursor:pointer; transition:transform .15s; flex:none;
+  }
+  .add-btn:active{transform:scale(.9)}
   .lang-btn{
     background:var(--slate-100); color:var(--slate-600);
     border:1px solid var(--slate-200); border-radius:9999px;
-    height:34px; padding:0 16px; font-size:13px; font-weight:900;
+    height:38px; padding:0 14px; font-size:13px; font-weight:900;
     cursor:pointer; flex:none; transition:transform .15s;
   }
   .lang-btn:active{transform:scale(.9)}
   main{max-width:760px; margin:0 auto; padding:14px}
-  .hint{
-    background:#fff; border:1px solid var(--slate-200); border-left:4px solid var(--blue);
-    border-radius:12px; padding:12px 14px; font-size:13px; color:var(--slate-600);
-    font-weight:600; margin-bottom:14px; line-height:1.5;
+  .attrib{
+    position:fixed; right:14px; bottom:calc(10px + var(--safe-bottom));
+    z-index:40; pointer-events:none;
   }
+  .attrib a{
+    pointer-events:auto;
+    font-size:11px; font-weight:600; color:var(--slate-400);
+    text-decoration:none; letter-spacing:.01em;
+    background:rgba(241,245,249,.85); backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    padding:4px 10px; border-radius:9999px; border:1px solid var(--slate-200);
+  }
+  .attrib a:hover{color:var(--blue); border-color:#bfdbfe}
   .loc-list{display:flex; flex-direction:column; gap:12px}
-  .card{
-    background:#fff; border-radius:16px;
+
+  /* swipe-reveal card (WeatherNext pattern): icon-only action bar, card slides over it.
+     On desktop the card doesn't slide (would clip the name) — the bar overlays the right edge. */
+  .card-wrap{
+    position:relative; width:100%; border-radius:16px; overflow:hidden;
+    background:#fff;
     box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
-    overflow:hidden;
+    isolation:isolate;
   }
+  .swipe-actions{
+    position:absolute; top:0; bottom:0; right:0; display:flex; width:168px; z-index:20;
+    transform:translateX(100%);
+    transition:transform .2s cubic-bezier(.2,.8,.2,1);
+  }
+  .card-wrap.actions-open .swipe-actions{ transform:translateX(0); }
+  .action-btn{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    border:none; cursor:pointer; color:#fff; -webkit-tap-highlight-color:transparent;
+  }
+  .action-btn:active{filter:brightness(.92)}
+  .btn-share{background:#10b981}
+  .btn-edit{background:#3b82f6}
+  .btn-delete{background:#ef4444}
+  .card{
+    position:relative; z-index:10; background:#fff; width:100%;
+    transition:padding-right .2s cubic-bezier(.2,.8,.2,1); will-change:padding-right;
+  }
+  /* when actions are open, reserve space on the right so content isn't hidden under the bar */
+  .card-wrap.actions-open .card-head,
+  .card-wrap.actions-open .card-body{
+    padding-right:180px; transition:padding-right .2s cubic-bezier(.2,.8,.2,1);
+  }
+  .action-btn svg{width:26px; height:26px}
   .card-head{display:flex; align-items:center; gap:12px; padding:14px 16px 10px}
   .pin{
     width:38px; height:38px; border-radius:11px; flex:none;
@@ -95,11 +132,49 @@
     line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .card-coords{font-size:12px; font-weight:700; color:var(--slate-400); margin-top:2px}
-  .del-btn{
-    background:none; border:none; color:var(--slate-300); font-size:20px;
-    cursor:pointer; padding:6px; flex:none; line-height:1; transition:color .15s;
+  .grip{
+    color:var(--slate-300); flex:none; display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; margin:-6px -8px -6px 0; padding:0;
+    border:none; background:none; cursor:pointer; border-radius:9px;
+    transition:color .15s, background .15s; -webkit-tap-highlight-color:transparent;
   }
-  .del-btn:active{color:#ef4444}
+  .grip:hover{color:var(--slate-500); background:var(--slate-100)}
+  .grip:active{transform:scale(.9)}
+
+  /* recycle-bin entry link (on Add view) */
+  .bin-entry{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    margin-top:14px; padding:11px; border:none; background:none; cursor:pointer;
+    color:var(--slate-500); font-size:13px; font-weight:800; transition:color .15s;
+  }
+  .bin-entry:hover{color:var(--slate-700)}
+  .bin-entry-count{
+    min-width:18px; height:18px; padding:0 5px; background:#ef4444; color:#fff;
+    font-size:10px; font-weight:900; border-radius:9999px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bin-entry-count.hidden{display:none}
+  /* back-to-add link (on Recycle view) */
+  .bin-back{
+    display:flex; align-items:center; gap:7px; margin-bottom:14px; padding:6px 0;
+    border:none; background:none; cursor:pointer; color:var(--blue);
+    font-size:14px; font-weight:800;
+  }
+  .bin-back:active{opacity:.6}
+
+
+  .bin-row{
+    display:flex; align-items:center; gap:10px; background:var(--slate-50);
+    border:1px solid var(--slate-100); border-radius:12px; padding:11px 12px; margin-bottom:8px;
+  }
+  .bin-info{flex:1; min-width:0}
+  .bin-name{font-size:15px; font-weight:900; color:var(--slate-700); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .bin-coords{font-size:11px; font-weight:700; color:var(--slate-400); margin-top:1px}
+  .bin-btn{border:none; border-radius:9px; padding:9px 12px; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; cursor:pointer; flex:none; transition:transform .15s}
+  .bin-btn:active{transform:scale(.92)}
+  .bin-restore{background:#dbeafe; color:var(--blue)}
+  .bin-purge{background:#fee2e2; color:#dc2626}
+
   .card-body{padding:0 16px 14px}
   .stat-row{display:flex; gap:10px; margin-bottom:12px}
   .stat{flex:1; border-radius:12px; padding:11px 8px; text-align:center}
@@ -149,21 +224,6 @@
   .empty .big{font-size:52px; margin-bottom:12px}
   .empty .t{font-size:17px; font-weight:900; color:var(--slate-600)}
   .empty .d{font-size:13px; font-weight:600; margin-top:6px}
-  .addbar{
-    position:fixed; left:0; right:0; bottom:0; z-index:50;
-    background:#fff; border-top:2px solid var(--slate-100);
-    box-shadow:inset 0 2px 4px 0 rgba(0,0,0,.05);
-    padding:12px 16px; padding-bottom:calc(12px + var(--safe-bottom));
-  }
-  .addbar-in{max-width:760px; margin:0 auto}
-  .addbtn{
-    width:100%; border:none; border-radius:14px; padding:15px;
-    background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff;
-    font-size:16px; font-weight:900; letter-spacing:.02em; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    box-shadow:0 10px 15px -3px rgba(29,78,216,.25); transition:transform .15s;
-  }
-  .addbtn:active{transform:scale(.97)}
   .overlay{
     position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:1000;
     display:none; align-items:flex-end; justify-content:center;
@@ -230,31 +290,27 @@
 
 <header>
   <div class="h-left">
-    <div class="icon-tile" onclick="openSheet()" title="添加地点 Add location">
-      <img src="data:image/png;base64,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" width="48" height="48" alt="RainLog" style="border-radius:16px;display:block;"/>
-      <span class="badge">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </span>
+    <div class="icon-tile" aria-hidden="true">
+      <img src="data:image/png;base64,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" width="34" height="34" alt="RainLog" style="border-radius:11px;display:block;"/>
     </div>
     <div class="h-title">
       <h1 id="t-title">雨量记录</h1>
-      <div class="sub" id="t-sub">过去 92 天 · RAINLOG</div>
     </div>
   </div>
-  <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+  <div class="h-actions">
+    <button class="add-btn" id="addBtn" onclick="openSheet()" title="添加地点 Add location" aria-label="添加地点 Add location">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
 </header>
 
 <main>
-  <div class="hint" id="t-hint"></div>
   <div class="loc-list" id="locList"></div>
 </main>
 
-<div class="addbar">
-  <div class="addbar-in">
-    <button class="addbtn" onclick="openSheet()">
-      <span style="font-size:20px;line-height:1">＋</span><span id="t-add">添加地点</span>
-    </button>
-  </div>
+<div class="attrib">
+  <a href="https://open-meteo.com/" target="_blank" rel="noopener" id="t-attrib">Data: Open-Meteo</a>
 </div>
 
 <div class="overlay" id="overlay">
@@ -264,20 +320,36 @@
     </button>
     <h2 id="t-sheet-title">添加地点</h2>
     <div class="sd" id="t-sheet-desc">为地点命名，然后输入坐标或使用 GPS 定位。</div>
-    <label id="t-l-name">地点名称 / NAME</label>
-    <input id="inName" placeholder="我的榴莲芭" autocomplete="off">
-    <label id="t-l-coords">坐标 纬度 / 经度</label>
-    <div class="coord-pair">
-      <div><input id="inLat" inputmode="decimal" placeholder="Lat 3.2478"></div>
-      <div><input id="inLng" inputmode="decimal" placeholder="Lng 102.4189"></div>
+
+    <div id="view-manual">
+      <label id="t-l-name">地点名称 / NAME</label>
+      <input id="inName" placeholder="我的榴莲芭" autocomplete="off">
+      <label id="t-l-coords">坐标 纬度 / 经度</label>
+      <div class="coord-pair">
+        <div><input id="inLat" inputmode="decimal" placeholder="Lat 3.2478"></div>
+        <div><input id="inLng" inputmode="decimal" placeholder="Lng 102.4189"></div>
+      </div>
+      <button class="gps-btn" onclick="useGPS()">
+        <span style="font-size:16px">📍</span><span id="t-gps">使用我的 GPS 定位</span>
+      </button>
+      <div class="gps-status" id="gpsStatus"></div>
+      <div class="sheet-actions">
+        <button class="s-act s-cancel" onclick="closeSheet()" id="t-cancel">取消</button>
+        <button class="s-act s-save" onclick="saveLoc()" id="t-save">保存</button>
+      </div>
+      <button class="bin-entry" id="binEntry" onclick="switchTab('recycle')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span id="t-bin-entry">回收站</span>
+        <span class="bin-entry-count" id="binCount">0</span>
+      </button>
     </div>
-    <button class="gps-btn" onclick="useGPS()">
-      <span style="font-size:16px">📍</span><span id="t-gps">使用我的 GPS 定位</span>
-    </button>
-    <div class="gps-status" id="gpsStatus"></div>
-    <div class="sheet-actions">
-      <button class="s-act s-cancel" onclick="closeSheet()" id="t-cancel">取消</button>
-      <button class="s-act s-save" onclick="saveLoc()" id="t-save">保存</button>
+
+    <div id="view-recycle" style="display:none">
+      <button class="bin-back" onclick="switchTab('manual')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span id="t-bin-back">返回添加</span>
+      </button>
+      <div id="binList"></div>
     </div>
   </div>
 </div>
@@ -287,22 +359,26 @@
 const NS="rainlog";
 const KEY=NS+".locations";
 const CACHEKEY=NS+".cache";
+const BINKEY=NS+".bin";
 const LANGKEY=NS+".lang";
 let lang=localStorage.getItem(LANGKEY)||"zh";
 let locations=loadLoc();
 let cache=loadCache();
+let bin=loadBin();
 function loadLoc(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}}
 function saveLoc_(){localStorage.setItem(KEY,JSON.stringify(locations))}
 function loadCache(){try{return JSON.parse(localStorage.getItem(CACHEKEY))||{}}catch{return{}}}
 function saveCache(){localStorage.setItem(CACHEKEY,JSON.stringify(cache))}
+function loadBin(){try{return JSON.parse(localStorage.getItem(BINKEY))||[]}catch{return[]}}
+function saveBin(){localStorage.setItem(BINKEY,JSON.stringify(bin))}
 const T={
   zh:{
     title:"雨量记录", sub:"过去 92 天 · RAINLOG",
-    hint:"数据来自 Open-Meteo（免费）。每个地点可查询过去 92 天的每日降雨量，并导出 Excel 表格。",
-    add:"添加地点", sheetTitle:"添加地点", sheetDesc:"为地点命名，然后输入坐标或使用 GPS 定位。",
+    attrib:"数据来源：Open-Meteo",
+    add:"添加", sheetTitle:"添加地点", sheetDesc:"为地点命名，然后输入坐标或使用 GPS 定位。",
     lName:"地点名称 / NAME", lCoords:"坐标 纬度 / 经度", gps:"使用我的 GPS 定位",
     cancel:"取消", save:"保存",
-    emptyT:"还没有地点", emptyD:"点击下方「添加地点」开始记录雨量。",
+    emptyT:"还没有地点", emptyD:"点击右上角的「＋ 添加」按钮，开始记录雨量。",
     get:"查询雨量", reget:"重新查询", xls:"导出 Excel",
     total:"总降雨量", rainy:"有雨天数", days92:"92 天",
     loading:"查询中…", loaded:n=>`已更新 · ${n} 天数据`, cached:"已保存的数据 · 可重新查询更新",
@@ -310,6 +386,11 @@ const T={
     needName:"请输入地点名称。", needCoords:"请输入有效坐标。",
     gpsWait:"正在定位…", gpsOk:"定位成功 ✓", gpsFail:"无法获取定位，请手动输入。", gpsNo:"此设备不支持 GPS。",
     confirmDel:n=>`删除「${n}」？`, xlNoData:"请先查询雨量再导出。",
+    share:"分享", edit:"编辑", del:"删除",
+    editTitle:"编辑地点", editDesc:"修改名称或重新定位坐标。",
+    binTitle:"回收站", binDesc:"还原已删除的地点，或永久删除。", binEmpty:"回收站是空的", restore:"还原", purge:"永久删除",
+    recycleTab:"回收站", backToAdd:"返回添加",
+    confirmPurge:n=>`永久删除「${n}」？此操作无法复原。`,
     colDate:"日期", colWeek:"星期", colMM:"降雨量 (mm)",
     sumLabel:"汇总", sheetName:"过去92天雨量",
     last14:"近 14 天", maxLabel:n=>`最高 ${n} mm`, byMonth:"按月统计", monthSheet:"按月汇总",
@@ -319,11 +400,11 @@ const T={
   },
   en:{
     title:"RainLog", sub:"PAST 92 DAYS · 雨量记录",
-    hint:"Data from Open-Meteo (free). Each location pulls the last 92 days of daily rainfall and exports to an Excel sheet.",
-    add:"Add location", sheetTitle:"Add location", sheetDesc:"Name the spot, then enter coordinates or use GPS.",
+    attrib:"Data: Open-Meteo",
+    add:"Add", sheetTitle:"Add location", sheetDesc:"Name the spot, then enter coordinates or use GPS.",
     lName:"LOCATION NAME / 名称", lCoords:"COORDINATES LAT / LNG", gps:"Use my GPS location",
     cancel:"Cancel", save:"Save",
-    emptyT:"No locations yet", emptyD:"Tap “Add location” below to start logging rainfall.",
+    emptyT:"No locations yet", emptyD:"Tap the “＋ Add” button in the top-right to start logging rainfall.",
     get:"Get rainfall", reget:"Refresh", xls:"Export Excel",
     total:"Total rainfall", rainy:"Rainy days", days92:"92 days",
     loading:"Loading…", loaded:n=>`Updated · ${n} days`, cached:"Saved data · refresh to update",
@@ -331,6 +412,11 @@ const T={
     needName:"Please enter a location name.", needCoords:"Please enter valid coordinates.",
     gpsWait:"Locating…", gpsOk:"Located ✓", gpsFail:"Couldn't locate. Enter manually.", gpsNo:"GPS not supported.",
     confirmDel:n=>`Delete “${n}”?`, xlNoData:"Get rainfall data first.",
+    share:"Share", edit:"Edit", del:"Delete",
+    editTitle:"Edit location", editDesc:"Change the name or re-pin the coordinates.",
+    binTitle:"Recycle bin", binDesc:"Restore deleted locations, or remove them for good.", binEmpty:"Recycle bin is empty", restore:"Restore", purge:"Delete forever",
+    recycleTab:"Recycle bin", backToAdd:"Back to add",
+    confirmPurge:n=>`Permanently delete “${n}”? This cannot be undone.`,
     colDate:"Date", colWeek:"Day", colMM:"Rainfall (mm)",
     sumLabel:"Summary", sheetName:"Rainfall_92d",
     last14:"Last 14 days", maxLabel:n=>`max ${n} mm`, byMonth:"By month", monthSheet:"By_month",
@@ -343,12 +429,13 @@ function tr(k){return T[lang][k]}
 function applyLang(){
   document.documentElement.lang=lang;
   document.getElementById("langBtn").textContent=lang==="zh"?"EN":"中";
-  const s=(id,v)=>document.getElementById(id).textContent=v;
-  s("t-title",tr("title")); s("t-sub",tr("sub")); s("t-hint",tr("hint"));
-  s("t-add",tr("add")); s("t-sheet-title",tr("sheetTitle")); s("t-sheet-desc",tr("sheetDesc"));
+  const s=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  s("t-title",tr("title")); s("t-attrib",tr("attrib"));
+  s("t-sheet-title",tr("sheetTitle")); s("t-sheet-desc",tr("sheetDesc"));
   s("t-l-name",tr("lName")); s("t-l-coords",tr("lCoords")); s("t-gps",tr("gps"));
   s("t-cancel",tr("cancel")); s("t-save",tr("save"));
-  render();
+  s("t-bin-entry",tr("recycleTab")); s("t-bin-back",tr("backToAdd"));
+  render(); renderBin(); updateBinCount();
 }
 function toggleLang(){lang=lang==="zh"?"en":"zh"; localStorage.setItem(LANGKEY,lang); applyLang()}
 function render(){
@@ -361,15 +448,30 @@ function render(){
     const c=cache[loc.id];
     const has=c&&c.days&&c.days.length;
     let status=""; if(has) status=c.stale?tr("cached"):tr("loaded")(c.days.length);
-    return `<div class="card">
+    return `<div class="card-wrap" id="wrap-${loc.id}">
+      <div class="swipe-actions">
+        <button class="action-btn btn-share" onclick="shareLoc('${loc.id}')" aria-label="${tr("share")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <button class="action-btn btn-edit" onclick="editLoc('${loc.id}')" aria-label="${tr("edit")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+        </button>
+        <button class="action-btn btn-delete" onclick="softDelete('${loc.id}')" aria-label="${tr("del")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+      </div>
+      <div class="card" id="content-${loc.id}"
+        ontouchstart="handleTouchStart(event,'${loc.id}')"
+        ontouchmove="handleTouchMove(event,'${loc.id}')"
+        ontouchend="handleTouchEnd(event,'${loc.id}')"
+        oncontextmenu="handleContextMenu(event,'${loc.id}')">
       <div class="card-head">
         <div class="pin">🌧️</div>
         <div class="card-name-wrap">
           <div class="card-name">${esc(loc.name)}</div>
-          <div class="card-coords tabular">${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}</div>
         </div>
-        <button class="del-btn" onclick="delLoc('${loc.id}')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <button class="grip" onclick="event.stopPropagation(); toggleCardActions('${loc.id}')" aria-label="${tr("share")} / ${tr("edit")} / ${tr("del")}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
         </button>
       </div>
       <div class="card-body">
@@ -390,6 +492,7 @@ function render(){
           </button>
         </div>
         <div class="card-status" id="st-${loc.id}">${status}</div>
+      </div>
       </div>
     </div>`;
   }).join("");
@@ -450,14 +553,36 @@ function monthRollupHTML(days){
     ${rows}
   </div>`;
 }
+let editId=null;
 function openSheet(){
+  editId=null;
+  document.getElementById("binEntry").style.display="";
+  switchTab("manual");
+  document.getElementById("t-sheet-title").textContent=tr("sheetTitle");
+  document.getElementById("t-sheet-desc").textContent=tr("sheetDesc");
   document.getElementById("inName").value="";
   document.getElementById("inLat").value="";
   document.getElementById("inLng").value="";
   const g=document.getElementById("gpsStatus"); g.textContent=""; g.style.color="";
+  renderBin(); updateBinCount();
   document.getElementById("overlay").classList.add("on");
 }
-function closeSheet(){document.getElementById("overlay").classList.remove("on")}
+function editLoc(id){
+  const loc=locations.find(l=>l.id===id); if(!loc) return;
+  if(swipeCurrentId) closeCardActions(swipeCurrentId);
+  editId=id;
+  document.getElementById("binEntry").style.display="none";
+  switchTab("manual");
+  document.getElementById("t-sheet-title").textContent=tr("editTitle");
+  document.getElementById("t-sheet-desc").textContent=tr("editDesc");
+  document.getElementById("inName").value=loc.name;
+  document.getElementById("inLat").value=loc.lat;
+  document.getElementById("inLng").value=loc.lng;
+  const g=document.getElementById("gpsStatus"); g.textContent=""; g.style.color="";
+  renderBin();
+  document.getElementById("overlay").classList.add("on");
+}
+function closeSheet(){document.getElementById("overlay").classList.remove("on"); editId=null;}
 function useGPS(){
   const s=document.getElementById("gpsStatus");
   if(!navigator.geolocation){s.style.color="#ef4444"; s.textContent=tr("gpsNo"); return}
@@ -476,16 +601,145 @@ function saveLoc(){
   const s=document.getElementById("gpsStatus");
   if(!name){s.style.color="#ef4444"; s.textContent=tr("needName"); return}
   if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){s.style.color="#ef4444"; s.textContent=tr("needCoords"); return}
-  locations.push({id:"L"+Date.now(),name,lat,lng});
-  saveLoc_(); closeSheet(); render();
+  if(editId){
+    const loc=locations.find(l=>l.id===editId);
+    if(loc){
+      const moved=(loc.lat!==lat||loc.lng!==lng);
+      loc.name=name; loc.lat=lat; loc.lng=lng;
+      if(moved) delete cache[editId]; // coords changed -> old rainfall no longer valid
+      saveLoc_(); saveCache();
+    }
+  }else{
+    locations.push({id:"L"+Date.now(),name,lat,lng});
+    saveLoc_();
+  }
+  closeSheet(); render();
 }
-function delLoc(id){
-  const loc=locations.find(l=>l.id===id); if(!loc) return;
-  if(confirm(tr("confirmDel")(loc.name))){
-    locations=locations.filter(l=>l.id!==id);
-    delete cache[id]; saveLoc_(); saveCache(); render();
+
+/* ===== soft delete / recycle bin ===== */
+function softDelete(id){
+  const i=locations.findIndex(l=>l.id===id); if(i<0) return;
+  if(swipeCurrentId) closeCardActions(swipeCurrentId);
+  const loc=locations[i];
+  bin.unshift({...loc, deletedAt:Date.now()});
+  locations.splice(i,1);
+  saveLoc_(); saveBin(); render(); updateBinCount();
+}
+function restoreLoc(id){
+  const i=bin.findIndex(l=>l.id===id); if(i<0) return;
+  const {deletedAt, ...loc}=bin[i];
+  if(locations.some(l=>l.id===loc.id)) loc.id="L"+Date.now();
+  locations.push(loc);
+  bin.splice(i,1);
+  saveLoc_(); saveBin(); render(); renderBin(); updateBinCount();
+}
+function purgeLoc(id){
+  const loc=bin.find(l=>l.id===id); if(!loc) return;
+  if(confirm(tr("confirmPurge")(loc.name))){
+    bin=bin.filter(l=>l.id!==id);
+    delete cache[id];
+    saveBin(); saveCache(); renderBin(); updateBinCount();
   }
 }
+function renderBin(){
+  const box=document.getElementById("binList");
+  if(!box) return;
+  if(!bin.length){ box.innerHTML=`<div class="bin-empty">${tr("binEmpty")}</div>`; return; }
+  box.innerHTML=bin.map(loc=>`<div class="bin-row">
+    <div class="bin-info">
+      <div class="bin-name">${esc(loc.name)}</div>
+      <div class="bin-coords tabular">${(+loc.lat).toFixed(4)}, ${(+loc.lng).toFixed(4)}</div>
+    </div>
+    <button class="bin-btn bin-purge" onclick="purgeLoc('${loc.id}')">${tr("purge")}</button>
+    <button class="bin-btn bin-restore" onclick="restoreLoc('${loc.id}')">${tr("restore")}</button>
+  </div>`).join("");
+}
+function updateBinCount(){
+  const badge=document.getElementById("binCount");
+  if(!badge) return;
+  if(bin.length){ badge.textContent=bin.length; badge.classList.remove("hidden"); }
+  else badge.classList.add("hidden");
+}
+/* switch between Add view and Recycle view inside the + dialog */
+function switchTab(tab){
+  document.getElementById("view-manual").style.display = (tab==="manual")?"":"none";
+  document.getElementById("view-recycle").style.display = (tab==="recycle")?"":"none";
+  // title/subtitle follow the view (edit mode keeps its own title)
+  if(!editId){
+    if(tab==="recycle"){
+      document.getElementById("t-sheet-title").textContent=tr("binTitle");
+      document.getElementById("t-sheet-desc").textContent=tr("binDesc");
+    }else{
+      document.getElementById("t-sheet-title").textContent=tr("sheetTitle");
+      document.getElementById("t-sheet-desc").textContent=tr("sheetDesc");
+    }
+  }
+  if(tab==="recycle") renderBin();
+}
+
+/* ===== share (placeholder hook — content TBD) ===== */
+function shareLoc(id){
+  const loc=locations.find(l=>l.id===id); if(!loc) return;
+  if(swipeCurrentId) closeCardActions(swipeCurrentId);
+  const c=cache[id];
+  // TODO: finalize WhatsApp message content in next round.
+  let msg=`${loc.name}\n${(+loc.lat).toFixed(4)}, ${(+loc.lng).toFixed(4)}`;
+  if(c&&c.days&&c.days.length){
+    msg+=`\n${tr("total")}: ${c.total.toFixed(1)} mm / ${c.days.length}${lang==="zh"?"天":"d"}`;
+  }
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+
+/* ===== swipe-reveal + right-click (bar slides in, card stays put) ===== */
+let swipeCurrentId=null, swipeStartX=0, swipeStartY=0, swipeDir=null, isSwiping=false;
+
+function openCardActions(id){
+  const wrap=document.getElementById("content-"+id)?.closest(".card-wrap");
+  if(!wrap) return;
+  wrap.classList.add("actions-open");
+  swipeCurrentId=id;
+}
+function closeCardActions(id){
+  const wrap=document.getElementById("content-"+id)?.closest(".card-wrap");
+  if(wrap) wrap.classList.remove("actions-open");
+  if(swipeCurrentId===id) swipeCurrentId=null;
+}
+function handleTouchStart(e,id){
+  if(swipeCurrentId&&swipeCurrentId!==id) closeCardActions(swipeCurrentId);
+  swipeStartX=e.touches[0].clientX; swipeStartY=e.touches[0].clientY; isSwiping=false; swipeDir=null;
+}
+function handleTouchMove(e,id){
+  const dx=e.touches[0].clientX-swipeStartX, dy=e.touches[0].clientY-swipeStartY;
+  if(!swipeDir){
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>10){ swipeDir="h"; }
+    else if(Math.abs(dy)>10){ swipeDir="v"; }
+  }
+  if(swipeDir==="h"){
+    isSwiping=true;
+    if(e.cancelable) e.preventDefault();
+  }
+}
+function handleTouchEnd(e,id){
+  if(swipeDir==="v"){ return; }
+  if(swipeDir!=="h") return; // a tap
+  const dx=e.changedTouches[0].clientX-swipeStartX;
+  if(dx<-40) openCardActions(id);        // swipe left -> open
+  else if(dx>40) closeCardActions(id);   // swipe right -> close
+  setTimeout(()=>isSwiping=false,50);
+}
+function handleContextMenu(e,id){      // right-click toggles (primary desktop path)
+  e.preventDefault();
+  if(swipeCurrentId&&swipeCurrentId!==id) closeCardActions(swipeCurrentId);
+  if(swipeCurrentId===id) closeCardActions(id); else openCardActions(id);
+}
+function toggleCardActions(id){        // the ⋯ grip button — works on every device
+  if(swipeCurrentId&&swipeCurrentId!==id) closeCardActions(swipeCurrentId);
+  if(swipeCurrentId===id) closeCardActions(id); else openCardActions(id);
+}
+/* tap elsewhere closes an open card */
+document.addEventListener("click",e=>{
+  if(swipeCurrentId && !e.target.closest(".card-wrap")) closeCardActions(swipeCurrentId);
+});
 async function getRain(id){
   const loc=locations.find(l=>l.id===id); if(!loc) return;
   const btn=document.getElementById("ld-"+id);
