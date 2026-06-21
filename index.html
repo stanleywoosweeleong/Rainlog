@@ -205,17 +205,17 @@
   .stat-row{display:flex; gap:10px; margin-bottom:12px}
   .stat{
     flex:1; min-width:0; border-radius:12px; padding:11px 13px;
-    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
   .stat.rain{background:#eff6ff}
   .stat.days{background:#ecfdf5}
-  .stat .n{font-size:28px; font-weight:900; line-height:1; letter-spacing:-.02em; flex:none; white-space:nowrap}
+  .stat .n{font-size:26px; font-weight:900; line-height:1; letter-spacing:-.03em; flex:0 0 auto; white-space:nowrap; text-align:right}
   .stat.rain .n{color:var(--blue)}
   .stat.days .n{color:#047857}
-  .stat .l{font-size:14px; font-weight:900; line-height:1.2; flex:1; min-width:0; word-break:keep-all}
+  .stat .l{font-size:13px; font-weight:900; line-height:1.15; flex:1 1 auto; min-width:0; word-break:keep-all; overflow-wrap:break-word}
   .stat.rain .l{color:#1d4ed8}
   .stat.days .l{color:#047857}
-  .stat .su{font-size:13px; font-weight:900; margin-left:1px; opacity:.85}
+  .stat .su{font-size:12px; font-weight:900; margin-left:1px; opacity:.85}
 
   /* 14-day mini bar strip */
   /* dry-spell tracker (flowering-induction signal) */
@@ -373,16 +373,19 @@
   }
   @media(max-width:430px){
     .stat .n, .dry-n{font-size:23px}
+    .stat.rain .n{font-size:21px}      /* total rainfall is the widest value — keep it from crowding its label */
     .stat .l, .dry-l{font-size:13px; line-height:1.15}
     .stat .su, .dry-u{font-size:11px}
-    .stat{padding:10px 11px; gap:5px}
+    .stat{padding:10px 11px; gap:6px}
     .dry-stat{padding:10px 11px; gap:5px}
   }
   @media(max-width:380px){
     .h-title h1{font-size:18px}
+    .stat.rain .n{font-size:19px}
   }
   @media(max-width:360px){
     .stat .n, .dry-n{font-size:20px}
+    .stat.rain .n{font-size:18px}
     .stat .l, .dry-l{font-size:12px}
   }
 </style>
