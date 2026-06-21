@@ -1,0 +1,563 @@
+<!-- RainLog 雨量记录 — WeatherNext family UI — past-92-day rainfall · Open-Meteo -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>雨量记录 RainLog</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="雨量记录">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#84d2f8">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIumbqOmHj+iusOW9lSBSYWluTG9nIiwgInNob3J0X25hbWUiOiAi6Zuo6YeP6K6w5b2VIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiM4NGQyZjgiLCAidGhlbWVfY29sb3IiOiAiIzg0ZDJmOCIsICJpY29ucyI6IFt7InNyYyI6ICJpY29uLTE5Mi5wbmciLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3BuZyIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9LCB7InNyYyI6ICJpY29uLTUxMi5wbmciLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3BuZyIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9XX0=">
+<style>
+  :root{
+    --safe-top:env(safe-area-inset-top);
+    --safe-bottom:env(safe-area-inset-bottom);
+    --blue:#1d4ed8; --blue-deep:#1e3a5f; --sky:#84d2f8;
+    --slate-900:#0f172a; --slate-700:#334155; --slate-600:#475569;
+    --slate-500:#64748b; --slate-400:#94a3b8; --slate-300:#cbd5e1;
+    --slate-200:#e2e8f0; --slate-100:#f1f5f9; --slate-50:#f8fafc;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{line-height:1.5;-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--slate-100); color:#000; margin:0; padding:0;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    user-select:none; -webkit-user-select:none;
+    padding-bottom:calc(96px + var(--safe-bottom));
+  }
+  .tabular{font-variant-numeric:tabular-nums}
+  header{
+    background:#fff; border-bottom:2px solid var(--slate-100);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 18px; padding-top:var(--safe-top);
+    height:calc(76px + var(--safe-top));
+    position:sticky; top:0; z-index:50;
+  }
+  .h-left{display:flex; align-items:center; gap:14px; min-width:0}
+  .icon-tile{
+    width:48px; height:48px; background:var(--blue); border-radius:16px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+    flex:none; cursor:pointer; transition:transform .15s;
+  }
+  .icon-tile:active{transform:scale(.95)}
+  .icon-tile .badge{
+    position:absolute; bottom:-4px; right:-4px; width:20px; height:20px;
+    background:#facc15; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; border:2px solid #fff;
+    box-shadow:0 1px 2px 0 rgba(0,0,0,.05);
+  }
+  .h-title h1{
+    font-size:20px; font-weight:900; letter-spacing:-.03em; line-height:1;
+    color:var(--slate-900); margin:0; white-space:nowrap;
+  }
+  .h-title .sub{
+    font-size:11px; font-weight:700; color:var(--slate-400);
+    margin-top:5px; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .lang-btn{
+    background:var(--slate-100); color:var(--slate-600);
+    border:1px solid var(--slate-200); border-radius:9999px;
+    height:34px; padding:0 16px; font-size:13px; font-weight:900;
+    cursor:pointer; flex:none; transition:transform .15s;
+  }
+  .lang-btn:active{transform:scale(.9)}
+  main{max-width:760px; margin:0 auto; padding:14px}
+  .hint{
+    background:#fff; border:1px solid var(--slate-200); border-left:4px solid var(--blue);
+    border-radius:12px; padding:12px 14px; font-size:13px; color:var(--slate-600);
+    font-weight:600; margin-bottom:14px; line-height:1.5;
+  }
+  .loc-list{display:flex; flex-direction:column; gap:12px}
+  .card{
+    background:#fff; border-radius:16px;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+    overflow:hidden;
+  }
+  .card-head{display:flex; align-items:center; gap:12px; padding:14px 16px 10px}
+  .pin{
+    width:38px; height:38px; border-radius:11px; flex:none;
+    background:linear-gradient(135deg,#38bdf8 0%,#0284c7 100%);
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+    box-shadow:0 1px 2px 0 rgba(0,0,0,.05);
+  }
+  .card-name-wrap{flex:1; min-width:0}
+  .card-name{
+    font-size:18px; font-weight:900; letter-spacing:-.02em; color:var(--slate-900);
+    line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .card-coords{font-size:12px; font-weight:700; color:var(--slate-400); margin-top:2px}
+  .del-btn{
+    background:none; border:none; color:var(--slate-300); font-size:20px;
+    cursor:pointer; padding:6px; flex:none; line-height:1; transition:color .15s;
+  }
+  .del-btn:active{color:#ef4444}
+  .card-body{padding:0 16px 14px}
+  .stat-row{display:flex; gap:10px; margin-bottom:12px}
+  .stat{flex:1; border-radius:12px; padding:11px 8px; text-align:center}
+  .stat.rain{background:#eff6ff}
+  .stat.days{background:#ecfdf5}
+  .stat .n{font-size:23px; font-weight:900; line-height:1; letter-spacing:-.02em}
+  .stat.rain .n{color:var(--blue)}
+  .stat.days .n{color:#047857}
+  .stat .l{font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; margin-top:5px; color:var(--slate-500)}
+
+  /* 14-day mini bar strip */
+  .mini-wrap{background:var(--slate-50); border:1px solid var(--slate-100); border-radius:12px; padding:10px 12px 8px; margin-bottom:12px}
+  .mini-cap{font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; color:var(--slate-500); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center}
+  .mini-cap .mx{font-weight:700; color:var(--slate-400); text-transform:none; letter-spacing:0}
+  .mini-bars{display:flex; align-items:flex-end; gap:3px; height:46px}
+  .mini-col{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%}
+  .mini-bar{width:100%; min-height:2px; border-radius:3px 3px 0 0; background:#bfdbfe}
+  .mini-bar.wet{background:linear-gradient(180deg,#38bdf8 0%,#1d4ed8 100%)}
+  .mini-bar.dry{background:var(--slate-200)}
+  .mini-axis{display:flex; justify-content:space-between; font-size:9px; font-weight:700; color:var(--slate-400); margin-top:5px}
+
+  /* monthly rollup */
+  .month-wrap{margin-bottom:12px}
+  .month-cap{font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; color:var(--slate-500); margin-bottom:7px}
+  .month-row{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--slate-100)}
+  .month-row:last-child{border-bottom:none}
+  .month-name{font-size:13px; font-weight:900; color:var(--slate-700); width:62px; flex:none}
+  .month-track{flex:1; height:8px; background:var(--slate-100); border-radius:5px; overflow:hidden}
+  .month-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,#38bdf8 0%,#1d4ed8 100%)}
+  .month-mm{font-size:13px; font-weight:900; color:var(--blue); width:62px; text-align:right; flex:none; font-variant-numeric:tabular-nums}
+  .month-days{font-size:10px; font-weight:700; color:var(--slate-400); width:34px; text-align:right; flex:none}
+
+  .btn-row{display:flex; gap:8px}
+  .act{
+    flex:1; border:none; border-radius:10px; padding:12px 8px;
+    font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.04em;
+    color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:6px; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+    transition:transform .15s; line-height:1.2;
+  }
+  .act:active{transform:scale(.95)}
+  .act:disabled{opacity:.45; box-shadow:none; transform:none; cursor:default}
+  .act-get{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)}
+  .act-xls{background:linear-gradient(135deg,#059669 0%,#047857 100%)}
+  .card-status{font-size:12px; font-weight:700; text-align:center; margin-top:9px; min-height:1em; color:var(--slate-400)}
+  .empty{text-align:center; padding:56px 24px; color:var(--slate-400)}
+  .empty .big{font-size:52px; margin-bottom:12px}
+  .empty .t{font-size:17px; font-weight:900; color:var(--slate-600)}
+  .empty .d{font-size:13px; font-weight:600; margin-top:6px}
+  .addbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:#fff; border-top:2px solid var(--slate-100);
+    box-shadow:inset 0 2px 4px 0 rgba(0,0,0,.05);
+    padding:12px 16px; padding-bottom:calc(12px + var(--safe-bottom));
+  }
+  .addbar-in{max-width:760px; margin:0 auto}
+  .addbtn{
+    width:100%; border:none; border-radius:14px; padding:15px;
+    background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff;
+    font-size:16px; font-weight:900; letter-spacing:.02em; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 10px 15px -3px rgba(29,78,216,.25); transition:transform .15s;
+  }
+  .addbtn:active{transform:scale(.97)}
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:1000;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .overlay.on{display:flex}
+  .sheet{
+    background:#fff; width:100%; max-width:760px;
+    border-radius:22px 22px 0 0; padding:22px 18px;
+    padding-bottom:calc(26px + var(--safe-bottom));
+    max-height:92vh; overflow:auto; position:relative;
+  }
+  .sheet h2{font-size:19px; font-weight:900; color:var(--slate-900); margin:0 0 4px; letter-spacing:-.02em}
+  .sheet .sd{font-size:13px; font-weight:600; color:var(--slate-500); margin-bottom:16px}
+  .x-btn{
+    position:absolute; top:16px; right:16px; background:none; border:none;
+    color:var(--slate-300); cursor:pointer; padding:6px; line-height:1;
+  }
+  label{display:block; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:var(--slate-500); margin:14px 0 6px}
+  input{
+    width:100%; border:1.5px solid var(--slate-200); border-radius:11px;
+    padding:13px; font-size:17px; font-weight:600; background:#fff; color:var(--slate-900);
+    font-family:inherit;
+  }
+  input::placeholder{font-weight:400; color:var(--slate-400)}
+  input:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(29,78,216,.12)}
+  .coord-pair{display:flex; gap:10px}
+  .coord-pair>div{flex:1}
+  .gps-btn{
+    width:100%; margin-top:12px; background:#eff6ff; color:var(--blue);
+    border:1.5px solid #bfdbfe; border-radius:11px; padding:13px;
+    font-size:14px; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:.03em;
+    display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .15s;
+  }
+  .gps-btn:active{transform:scale(.97)}
+  .gps-status{font-size:12px; font-weight:700; text-align:center; margin-top:8px; min-height:1em; color:var(--slate-400)}
+  .sheet-actions{display:flex; gap:10px; margin-top:22px}
+  .s-act{flex:1; border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:900; cursor:pointer; transition:transform .15s; letter-spacing:.02em}
+  .s-act:active{transform:scale(.96)}
+  .s-cancel{background:var(--slate-100); color:var(--slate-600)}
+  .s-save{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; box-shadow:0 4px 6px -1px rgba(29,78,216,.25)}
+  .spin{display:inline-block; width:14px; height:14px; border:2.5px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @keyframes bootspin{to{transform:rotate(360deg)}}
+  @media(min-width:760px){
+    .overlay{align-items:center}
+    .sheet{border-radius:22px; max-height:86vh}
+  }
+  @media(max-width:380px){
+    .h-title h1{font-size:18px}
+    .stat .n{font-size:20px}
+  }
+</style>
+</head>
+<body>
+
+<div id="boot-screen" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#84d2f8;transition:opacity .4s ease;">
+  <img src="data:image/png;base64,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" width="104" height="104" alt="RainLog"
+       style="border-radius:24px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.18));"
+       onerror="this.style.display='none';"/>
+  <div style="margin-top:22px;width:34px;height:34px;border:4px solid rgba(255,255,255,.6);border-top-color:#1e3a5f;border-radius:50%;animation:bootspin .8s linear infinite;"></div>
+  <div style="margin-top:18px;font-size:16px;font-weight:800;color:#0b3a5c;letter-spacing:.02em;">雨量记录 RainLog</div>
+  <div style="margin-top:4px;font-size:13px;font-weight:700;color:#1e5b8a;letter-spacing:.02em;">载入中… Loading…</div>
+</div>
+
+<header>
+  <div class="h-left">
+    <div class="icon-tile" onclick="openSheet()" title="添加地点 Add location">
+      <img src="data:image/png;base64,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" width="48" height="48" alt="RainLog" style="border-radius:16px;display:block;"/>
+      <span class="badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+    </div>
+    <div class="h-title">
+      <h1 id="t-title">雨量记录</h1>
+      <div class="sub" id="t-sub">过去 92 天 · RAINLOG</div>
+    </div>
+  </div>
+  <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+</header>
+
+<main>
+  <div class="hint" id="t-hint"></div>
+  <div class="loc-list" id="locList"></div>
+</main>
+
+<div class="addbar">
+  <div class="addbar-in">
+    <button class="addbtn" onclick="openSheet()">
+      <span style="font-size:20px;line-height:1">＋</span><span id="t-add">添加地点</span>
+    </button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <button class="x-btn" onclick="closeSheet()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2 id="t-sheet-title">添加地点</h2>
+    <div class="sd" id="t-sheet-desc">为地点命名，然后输入坐标或使用 GPS 定位。</div>
+    <label id="t-l-name">地点名称 / NAME</label>
+    <input id="inName" placeholder="我的榴莲芭" autocomplete="off">
+    <label id="t-l-coords">坐标 纬度 / 经度</label>
+    <div class="coord-pair">
+      <div><input id="inLat" inputmode="decimal" placeholder="Lat 3.2478"></div>
+      <div><input id="inLng" inputmode="decimal" placeholder="Lng 102.4189"></div>
+    </div>
+    <button class="gps-btn" onclick="useGPS()">
+      <span style="font-size:16px">📍</span><span id="t-gps">使用我的 GPS 定位</span>
+    </button>
+    <div class="gps-status" id="gpsStatus"></div>
+    <div class="sheet-actions">
+      <button class="s-act s-cancel" onclick="closeSheet()" id="t-cancel">取消</button>
+      <button class="s-act s-save" onclick="saveLoc()" id="t-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const NS="rainlog";
+const KEY=NS+".locations";
+const CACHEKEY=NS+".cache";
+const LANGKEY=NS+".lang";
+let lang=localStorage.getItem(LANGKEY)||"zh";
+let locations=loadLoc();
+let cache=loadCache();
+function loadLoc(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}}
+function saveLoc_(){localStorage.setItem(KEY,JSON.stringify(locations))}
+function loadCache(){try{return JSON.parse(localStorage.getItem(CACHEKEY))||{}}catch{return{}}}
+function saveCache(){localStorage.setItem(CACHEKEY,JSON.stringify(cache))}
+const T={
+  zh:{
+    title:"雨量记录", sub:"过去 92 天 · RAINLOG",
+    hint:"数据来自 Open-Meteo（免费）。每个地点可查询过去 92 天的每日降雨量，并导出 Excel 表格。",
+    add:"添加地点", sheetTitle:"添加地点", sheetDesc:"为地点命名，然后输入坐标或使用 GPS 定位。",
+    lName:"地点名称 / NAME", lCoords:"坐标 纬度 / 经度", gps:"使用我的 GPS 定位",
+    cancel:"取消", save:"保存",
+    emptyT:"还没有地点", emptyD:"点击下方「添加地点」开始记录雨量。",
+    get:"查询雨量", reget:"重新查询", xls:"导出 Excel",
+    total:"总降雨量", rainy:"有雨天数", days92:"92 天",
+    loading:"查询中…", loaded:n=>`已更新 · ${n} 天数据`, cached:"已保存的数据 · 可重新查询更新",
+    errFetch:"查询失败，请检查网络后重试。",
+    needName:"请输入地点名称。", needCoords:"请输入有效坐标。",
+    gpsWait:"正在定位…", gpsOk:"定位成功 ✓", gpsFail:"无法获取定位，请手动输入。", gpsNo:"此设备不支持 GPS。",
+    confirmDel:n=>`删除「${n}」？`, xlNoData:"请先查询雨量再导出。",
+    colDate:"日期", colWeek:"星期", colMM:"降雨量 (mm)",
+    sumLabel:"汇总", sheetName:"过去92天雨量",
+    last14:"近 14 天", maxLabel:n=>`最高 ${n} mm`, byMonth:"按月统计", monthSheet:"按月汇总",
+    colMonth:"月份", colMonthMM:"月降雨量 (mm)", colMonthDays:"有雨天数",
+    monthNames:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
+    week:["周日","周一","周二","周三","周四","周五","周六"]
+  },
+  en:{
+    title:"RainLog", sub:"PAST 92 DAYS · 雨量记录",
+    hint:"Data from Open-Meteo (free). Each location pulls the last 92 days of daily rainfall and exports to an Excel sheet.",
+    add:"Add location", sheetTitle:"Add location", sheetDesc:"Name the spot, then enter coordinates or use GPS.",
+    lName:"LOCATION NAME / 名称", lCoords:"COORDINATES LAT / LNG", gps:"Use my GPS location",
+    cancel:"Cancel", save:"Save",
+    emptyT:"No locations yet", emptyD:"Tap “Add location” below to start logging rainfall.",
+    get:"Get rainfall", reget:"Refresh", xls:"Export Excel",
+    total:"Total rainfall", rainy:"Rainy days", days92:"92 days",
+    loading:"Loading…", loaded:n=>`Updated · ${n} days`, cached:"Saved data · refresh to update",
+    errFetch:"Fetch failed. Check your connection and retry.",
+    needName:"Please enter a location name.", needCoords:"Please enter valid coordinates.",
+    gpsWait:"Locating…", gpsOk:"Located ✓", gpsFail:"Couldn't locate. Enter manually.", gpsNo:"GPS not supported.",
+    confirmDel:n=>`Delete “${n}”?`, xlNoData:"Get rainfall data first.",
+    colDate:"Date", colWeek:"Day", colMM:"Rainfall (mm)",
+    sumLabel:"Summary", sheetName:"Rainfall_92d",
+    last14:"Last 14 days", maxLabel:n=>`max ${n} mm`, byMonth:"By month", monthSheet:"By_month",
+    colMonth:"Month", colMonthMM:"Monthly rainfall (mm)", colMonthDays:"Rainy days",
+    monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    week:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+  }
+};
+function tr(k){return T[lang][k]}
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.getElementById("langBtn").textContent=lang==="zh"?"EN":"中";
+  const s=(id,v)=>document.getElementById(id).textContent=v;
+  s("t-title",tr("title")); s("t-sub",tr("sub")); s("t-hint",tr("hint"));
+  s("t-add",tr("add")); s("t-sheet-title",tr("sheetTitle")); s("t-sheet-desc",tr("sheetDesc"));
+  s("t-l-name",tr("lName")); s("t-l-coords",tr("lCoords")); s("t-gps",tr("gps"));
+  s("t-cancel",tr("cancel")); s("t-save",tr("save"));
+  render();
+}
+function toggleLang(){lang=lang==="zh"?"en":"zh"; localStorage.setItem(LANGKEY,lang); applyLang()}
+function render(){
+  const list=document.getElementById("locList");
+  if(!locations.length){
+    list.innerHTML=`<div class="empty"><div class="big">🗺️</div><div class="t">${tr("emptyT")}</div><div class="d">${tr("emptyD")}</div></div>`;
+    return;
+  }
+  list.innerHTML=locations.map(loc=>{
+    const c=cache[loc.id];
+    const has=c&&c.days&&c.days.length;
+    let status=""; if(has) status=c.stale?tr("cached"):tr("loaded")(c.days.length);
+    return `<div class="card">
+      <div class="card-head">
+        <div class="pin">🌧️</div>
+        <div class="card-name-wrap">
+          <div class="card-name">${esc(loc.name)}</div>
+          <div class="card-coords tabular">${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}</div>
+        </div>
+        <button class="del-btn" onclick="delLoc('${loc.id}')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        ${has?`<div class="stat-row">
+          <div class="stat rain"><div class="n tabular">${c.total.toFixed(1)}</div><div class="l">${tr("total")} (mm)</div></div>
+          <div class="stat days"><div class="n tabular">${c.rainy}</div><div class="l">${tr("rainy")}</div></div>
+        </div>
+        ${miniChartHTML(c.days)}
+        ${monthRollupHTML(c.days)}`:``}
+        <div class="btn-row">
+          <button class="act act-get" id="ld-${loc.id}" onclick="getRain('${loc.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><polyline points="21 3 21 9 15 9"/></svg>
+            ${has?tr("reget"):tr("get")}
+          </button>
+          <button class="act act-xls" ${has?"":"disabled"} onclick="exportXLS('${loc.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ${tr("xls")}
+          </button>
+        </div>
+        <div class="card-status" id="st-${loc.id}">${status}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function esc(s){return(s+"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+
+/* aggregate daily records into months (chronological) */
+function monthlyAgg(days){
+  const map=new Map();
+  days.forEach(d=>{
+    const key=d.date.slice(0,7); // YYYY-MM
+    if(!map.has(key)) map.set(key,{key,mm:0,rainy:0});
+    const o=map.get(key); o.mm+=d.mm; if(d.mm>=0.1) o.rainy++;
+  });
+  return [...map.values()].sort((a,b)=>a.key<b.key?-1:1);
+}
+function monthLabel(key){
+  const m=parseInt(key.slice(5,7),10);
+  const yr=key.slice(2,4);
+  return tr("monthNames")[m-1]+" '"+yr;
+}
+
+/* 14-day mini bar strip */
+function miniChartHTML(days){
+  const last=days.slice(-14);
+  if(!last.length) return "";
+  const max=Math.max(...last.map(d=>d.mm),1);
+  const bars=last.map(d=>{
+    const h=Math.max(2,Math.round((d.mm/max)*100));
+    const cls=d.mm>=0.1?"wet":"dry";
+    return `<div class="mini-col"><div class="mini-bar ${cls}" style="height:${h}%"></div></div>`;
+  }).join("");
+  const first=last[0].date.slice(5).replace("-","/");
+  const lastD=last[last.length-1].date.slice(5).replace("-","/");
+  return `<div class="mini-wrap">
+    <div class="mini-cap"><span>${tr("last14")}</span><span class="mx">${tr("maxLabel")(max.toFixed(1))}</span></div>
+    <div class="mini-bars">${bars}</div>
+    <div class="mini-axis"><span>${first}</span><span>${lastD}</span></div>
+  </div>`;
+}
+
+/* monthly rollup bars */
+function monthRollupHTML(days){
+  const months=monthlyAgg(days);
+  if(months.length<2) return "";
+  const max=Math.max(...months.map(m=>m.mm),1);
+  const rows=months.map(m=>{
+    const w=Math.max(3,Math.round((m.mm/max)*100));
+    return `<div class="month-row">
+      <div class="month-name">${monthLabel(m.key)}</div>
+      <div class="month-track"><div class="month-fill" style="width:${w}%"></div></div>
+      <div class="month-mm tabular">${m.mm.toFixed(1)}</div>
+      <div class="month-days tabular">${m.rainy}${lang==="zh"?"天":"d"}</div>
+    </div>`;
+  }).join("");
+  return `<div class="month-wrap">
+    <div class="month-cap">${tr("byMonth")}</div>
+    ${rows}
+  </div>`;
+}
+function openSheet(){
+  document.getElementById("inName").value="";
+  document.getElementById("inLat").value="";
+  document.getElementById("inLng").value="";
+  const g=document.getElementById("gpsStatus"); g.textContent=""; g.style.color="";
+  document.getElementById("overlay").classList.add("on");
+}
+function closeSheet(){document.getElementById("overlay").classList.remove("on")}
+function useGPS(){
+  const s=document.getElementById("gpsStatus");
+  if(!navigator.geolocation){s.style.color="#ef4444"; s.textContent=tr("gpsNo"); return}
+  s.style.color="#94a3b8"; s.textContent=tr("gpsWait");
+  navigator.geolocation.getCurrentPosition(p=>{
+    document.getElementById("inLat").value=p.coords.latitude.toFixed(6);
+    document.getElementById("inLng").value=p.coords.longitude.toFixed(6);
+    s.style.color="#047857"; s.textContent=tr("gpsOk");
+  },()=>{s.style.color="#ef4444"; s.textContent=tr("gpsFail")},
+  {enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+function saveLoc(){
+  const name=document.getElementById("inName").value.trim();
+  const lat=parseFloat(document.getElementById("inLat").value);
+  const lng=parseFloat(document.getElementById("inLng").value);
+  const s=document.getElementById("gpsStatus");
+  if(!name){s.style.color="#ef4444"; s.textContent=tr("needName"); return}
+  if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){s.style.color="#ef4444"; s.textContent=tr("needCoords"); return}
+  locations.push({id:"L"+Date.now(),name,lat,lng});
+  saveLoc_(); closeSheet(); render();
+}
+function delLoc(id){
+  const loc=locations.find(l=>l.id===id); if(!loc) return;
+  if(confirm(tr("confirmDel")(loc.name))){
+    locations=locations.filter(l=>l.id!==id);
+    delete cache[id]; saveLoc_(); saveCache(); render();
+  }
+}
+async function getRain(id){
+  const loc=locations.find(l=>l.id===id); if(!loc) return;
+  const btn=document.getElementById("ld-"+id);
+  const st=document.getElementById("st-"+id);
+  btn.disabled=true; btn.innerHTML=`<span class="spin"></span> ${tr("loading")}`;
+  st.style.color="#94a3b8"; st.textContent="";
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}&daily=precipitation_sum&past_days=92&forecast_days=0&timezone=auto`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error("http "+r.status);
+    const j=await r.json();
+    const dates=j.daily.time, vals=j.daily.precipitation_sum;
+    const days=dates.map((d,i)=>({date:d,mm:(vals[i]==null?0:vals[i])}));
+    const total=days.reduce((a,b)=>a+b.mm,0);
+    const rainy=days.filter(d=>d.mm>=0.1).length;
+    cache[id]={days,total,rainy,stale:false,fetched:Date.now()};
+    saveCache(); render();
+  }catch(e){
+    btn.disabled=false;
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><polyline points="21 3 21 9 15 9"/></svg> ${cache[id]?tr("reget"):tr("get")}`;
+    st.style.color="#ef4444"; st.textContent=tr("errFetch");
+  }
+}
+function exportXLS(id){
+  const loc=locations.find(l=>l.id===id);
+  const c=cache[id];
+  if(!loc||!c||!c.days){alert(tr("xlNoData")); return}
+  const wk=tr("week");
+  const header=[tr("colDate"),tr("colWeek"),tr("colMM")];
+  const rows=c.days.map(d=>{
+    const dt=new Date(d.date+"T00:00:00");
+    return [d.date,wk[dt.getDay()],Number(d.mm.toFixed(1))];
+  });
+  const aoa=[
+    [loc.name,"",""],
+    [`${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`,"",""],
+    [],
+    header,
+    ...rows,
+    [],
+    [tr("sumLabel"),"",""],
+    [tr("total")+" (mm)","",Number(c.total.toFixed(1))],
+    [tr("rainy"),"",c.rainy],
+    [tr("days92"),"",c.days.length]
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"]=[{wch:16},{wch:9},{wch:14}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,tr("sheetName"));
+
+  const months=monthlyAgg(c.days);
+  const maoa=[
+    [loc.name,"",""],
+    [],
+    [tr("colMonth"),tr("colMonthMM"),tr("colMonthDays")],
+    ...months.map(m=>[monthLabel(m.key),Number(m.mm.toFixed(1)),m.rainy])
+  ];
+  const mws=XLSX.utils.aoa_to_sheet(maoa);
+  mws["!cols"]=[{wch:12},{wch:20},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,mws,tr("monthSheet"));
+
+  const safe=loc.name.replace(/[\\\/:*?"<>|]/g,"_");
+  XLSX.writeFile(wb,`${safe}_92d_rain.xlsx`);
+}
+Object.keys(cache).forEach(k=>{if(cache[k]) cache[k].stale=true});
+applyLang();
+window.addEventListener("load",()=>{
+  setTimeout(()=>{
+    const b=document.getElementById("boot-screen");
+    if(b){b.style.opacity="0"; setTimeout(()=>b.remove(),420)}
+  },650);
+});
+</script>
+</body>
+</html>
