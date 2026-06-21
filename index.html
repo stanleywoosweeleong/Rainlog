@@ -113,23 +113,28 @@
   .thresh-opt.on{background:#fff; color:var(--blue); box-shadow:0 1px 2px rgba(0,0,0,.08)}
   .thresh-opt.on small{color:#2563eb}
 
-  /* swipe-reveal card (WeatherNext pattern): icon-only action bar, card slides over it.
-     On desktop the card doesn't slide (would clip the name) — the bar overlays the right edge. */
+  /* Action bar: on mobile it drops DOWN below the card content as a row of 3 buttons;
+     on desktop (>=760px) it overlays the right edge (sliding in). */
   .card-wrap{
     position:relative; width:100%; border-radius:16px; overflow:hidden;
     background:#fff;
     box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
     isolation:isolate;
   }
+  /* --- mobile default: drop-down row below the card --- */
   .swipe-actions{
-    position:absolute; top:0; bottom:0; right:0; display:flex; width:168px; z-index:20;
-    transform:translateX(100%);
-    transition:transform .2s cubic-bezier(.2,.8,.2,1);
+    display:flex; width:100%; overflow:hidden;
+    max-height:0; opacity:0;
+    transition:max-height .24s cubic-bezier(.2,.8,.2,1), opacity .18s;
+    border-top:0 solid var(--slate-100);
   }
-  .card-wrap.actions-open .swipe-actions{ transform:translateX(0); }
+  .card-wrap.actions-open .swipe-actions{
+    max-height:64px; opacity:1; border-top-width:1px;
+  }
   .action-btn{
     flex:1; display:flex; align-items:center; justify-content:center;
-    border:none; cursor:pointer; color:#fff; -webkit-tap-highlight-color:transparent;
+    border:none; cursor:pointer; color:#fff; height:60px;
+    -webkit-tap-highlight-color:transparent;
   }
   .action-btn:active{filter:brightness(.92)}
   .btn-share{background:#10b981}
@@ -137,14 +142,24 @@
   .btn-delete{background:#ef4444}
   .card{
     position:relative; z-index:10; background:#fff; width:100%;
-    transition:padding-right .2s cubic-bezier(.2,.8,.2,1); will-change:padding-right;
-  }
-  /* when actions are open, reserve space on the right so content isn't hidden under the bar */
-  .card-wrap.actions-open .card-head,
-  .card-wrap.actions-open .card-body{
-    padding-right:180px; transition:padding-right .2s cubic-bezier(.2,.8,.2,1);
   }
   .action-btn svg{width:26px; height:26px}
+
+  /* --- desktop: overlay on the right edge (sliding in), card content unshifted --- */
+  @media(min-width:760px){
+    .swipe-actions{
+      position:absolute; top:0; bottom:0; right:0; width:168px; max-height:none; opacity:1;
+      z-index:20; border-top:0;
+      transform:translateX(100%);
+      transition:transform .2s cubic-bezier(.2,.8,.2,1);
+    }
+    .card-wrap.actions-open .swipe-actions{ transform:translateX(0); max-height:none; }
+    .action-btn{height:auto}
+    .card-wrap.actions-open .card-head,
+    .card-wrap.actions-open .card-body{
+      padding-right:180px; transition:padding-right .2s cubic-bezier(.2,.8,.2,1);
+    }
+  }
   .card-head{display:flex; align-items:center; gap:12px; padding:14px 16px 10px}
   .pin{
     width:38px; height:38px; border-radius:11px; flex:none;
@@ -372,20 +387,29 @@
     .sheet{border-radius:22px; max-height:86vh}
   }
   @media(max-width:430px){
-    .stat .n, .dry-n{font-size:23px}
-    .stat.rain .n{font-size:21px}      /* total rainfall is the widest value — keep it from crowding its label */
-    .stat .l, .dry-l{font-size:13px; line-height:1.15}
-    .stat .su, .dry-u{font-size:11px}
-    .stat{padding:10px 11px; gap:6px}
-    .dry-stat{padding:10px 11px; gap:5px}
+    /* stack each tile: label on top row, big number on its own row below */
+    .stat{
+      flex-direction:column; align-items:flex-start; justify-content:center;
+      gap:4px; padding:11px 13px;
+    }
+    .stat .l{font-size:13px; line-height:1.2; flex:none; width:100%}
+    .stat .n{font-size:27px; text-align:left; width:100%}
+    .stat.rain .n{font-size:27px}
+    .stat .su, .dry-u{font-size:12px}
+    /* dry tiles: same two-row stack — label (+ date range) on top, number below */
+    .dry-stat{
+      flex-direction:column; align-items:flex-start; justify-content:center;
+      gap:4px; padding:11px 13px;
+    }
+    .dry-l{font-size:13px; line-height:1.2; flex:none; width:100%}
+    .dry-n{font-size:27px; text-align:left; width:100%}
   }
   @media(max-width:380px){
     .h-title h1{font-size:18px}
-    .stat.rain .n{font-size:19px}
+    .stat .n, .dry-n{font-size:24px}
   }
   @media(max-width:360px){
-    .stat .n, .dry-n{font-size:20px}
-    .stat.rain .n{font-size:18px}
+    .stat .n, .dry-n{font-size:22px}
     .stat .l, .dry-l{font-size:12px}
   }
 </style>
@@ -694,17 +718,6 @@ function render(){
     const has=c&&c.days&&c.days.length;
     let status=""; if(has) status=c.stale?tr("cached"):tr("loaded")(c.days.length);
     return `<div class="card-wrap" id="wrap-${loc.id}">
-      <div class="swipe-actions">
-        <button class="action-btn btn-share" onclick="shareLoc('${loc.id}')" aria-label="${tr("share")}">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-        <button class="action-btn btn-edit" onclick="editLoc('${loc.id}')" aria-label="${tr("edit")}">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-        </button>
-        <button class="action-btn btn-delete" onclick="softDelete('${loc.id}')" aria-label="${tr("del")}">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        </button>
-      </div>
       <div class="card" id="content-${loc.id}"
         ontouchstart="handleTouchStart(event,'${loc.id}')"
         ontouchmove="handleTouchMove(event,'${loc.id}')"
@@ -740,6 +753,17 @@ function render(){
         </div>
         <div class="card-status" id="st-${loc.id}">${status}</div>
       </div>
+      </div>
+      <div class="swipe-actions">
+        <button class="action-btn btn-share" onclick="shareLoc('${loc.id}')" aria-label="${tr("share")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <button class="action-btn btn-edit" onclick="editLoc('${loc.id}')" aria-label="${tr("edit")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+        </button>
+        <button class="action-btn btn-delete" onclick="softDelete('${loc.id}')" aria-label="${tr("del")}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
       </div>
     </div>`;
   }).join("");
@@ -1181,6 +1205,32 @@ function deltaT(T, RH){
   const d = T - Tw;
   return (isFinite(d) && d>=0) ? d : null;
 }
+/* On launch: refresh only farms whose data is from a previous day, one at a time
+   (throttled), skipping entirely when offline. Keeps the numbers current without
+   bursting Open-Meteo. */
+function isFromPreviousDay(ts){
+  if(!ts) return true;                       // never fetched in this cache shape -> treat as stale
+  const f=new Date(ts), n=new Date();
+  return f.getFullYear()!==n.getFullYear() || f.getMonth()!==n.getMonth() || f.getDate()!==n.getDate();
+}
+let autoRefreshing=false;
+async function autoRefreshStale(){
+  if(autoRefreshing) return;                 // don't overlap runs
+  if(navigator.onLine===false) return;       // offline: keep showing cached data, don't error
+  // queue farms that have data but it's from a previous day
+  const queue=locations.filter(l=>{
+    const c=cache[l.id];
+    return c && c.days && c.days.length && isFromPreviousDay(c.fetched);
+  });
+  if(!queue.length) return;
+  autoRefreshing=true;
+  try{
+    for(const loc of queue){
+      try{ await getRain(loc.id); }catch(_){}   // getRain handles its own errors/UI
+      await new Promise(r=>setTimeout(r, 1200)); // throttle: ~1.2s gap between farms
+    }
+  }finally{ autoRefreshing=false; }
+}
 async function getRain(id){
   const loc=locations.find(l=>l.id===id); if(!loc) return;
   const btn=document.getElementById("ld-"+id);
@@ -1333,6 +1383,14 @@ window.addEventListener("load",()=>{
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(()=>{});
   }
+  // Cached data shows instantly; then quietly refresh any farm whose data is from
+  // a previous day (one at a time, skipped if offline).
+  setTimeout(autoRefreshStale, 900);
+});
+// Relaunch from background (PWA reopened from app switcher) doesn't re-fire "load".
+// Re-check on return to foreground; autoRefreshStale only acts if data is a day old.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible") autoRefreshStale();
 });
 </script>
 </body>
