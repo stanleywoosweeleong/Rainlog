@@ -1230,7 +1230,15 @@ function handleTouchMove(e,id){
 }
 function handleTouchEnd(e,id){
   if(swipeDir==="v"){ return; }
-  if(swipeDir!=="h") return; // a tap
+  if(swipeDir!=="h"){
+    // A tap (no horizontal drag). If this card's actions are already open and the
+    // tap landed on the card itself (not an action button), treat it as "cancel".
+    if(swipeCurrentId===id && !e.target.closest(".swipe-actions")){
+      closeCardActions(id);
+      if(e.cancelable) e.preventDefault();   // stop the follow-up click from re-toggling
+    }
+    return;
+  }
   const dx=e.changedTouches[0].clientX-swipeStartX;
   if(dx<-40) openCardActions(id);        // swipe left -> open
   else if(dx>40) closeCardActions(id);   // swipe right -> close
@@ -1245,9 +1253,16 @@ function toggleCardActions(id){        // the ⋯ grip button — works on every
   if(swipeCurrentId&&swipeCurrentId!==id) closeCardActions(swipeCurrentId);
   if(swipeCurrentId===id) closeCardActions(id); else openCardActions(id);
 }
-/* tap elsewhere closes an open card */
+/* tap elsewhere closes an open card; tapping the open card's own surface
+   (anywhere except an action button) also cancels it */
 document.addEventListener("click",e=>{
-  if(swipeCurrentId && !e.target.closest(".card-wrap")) closeCardActions(swipeCurrentId);
+  if(!swipeCurrentId) return;
+  const wrap=e.target.closest(".card-wrap");
+  if(!wrap){ closeCardActions(swipeCurrentId); return; }   // tapped outside any card
+  // tapped inside a card: cancel only if it's the open card and not an action button
+  if(wrap.id==="wrap-"+swipeCurrentId && !e.target.closest(".swipe-actions") && !e.target.closest(".grip")){
+    closeCardActions(swipeCurrentId);
+  }
 });
 /* date helper: YYYY-MM-DD in local time */
 function ymd(d){
