@@ -1,4 +1,4 @@
-<!-- RainLog 雨量记录 — WeatherNext family UI — past-92-day rainfall · Open-Meteo -->
+<!-- RainLog 雨量记录 — WeatherNext family UI — last 3 full months + current month to yesterday · Open-Meteo -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -86,6 +86,23 @@
   }
   .attrib a:hover{color:var(--blue); border-color:#bfdbfe}
   .loc-list{display:flex; flex-direction:column; gap:12px}
+
+  /* rainy-day threshold toggle */
+  .thresh-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#fff; border-radius:14px; padding:10px 12px 10px 14px; margin-bottom:12px;
+    box-shadow:0 1px 2px 0 rgba(0,0,0,.05);
+  }
+  .thresh-label{font-size:15px; font-weight:900; color:var(--slate-700); letter-spacing:-.01em}
+  .thresh-seg{display:flex; gap:3px; background:var(--slate-100); border-radius:9px; padding:3px; flex:none}
+  .thresh-opt{
+    border:none; background:none; cursor:pointer; border-radius:7px;
+    padding:6px 11px; font-size:12px; font-weight:900; color:var(--slate-600);
+    white-space:nowrap; transition:all .15s; line-height:1.2;
+  }
+  .thresh-opt small{display:block; font-size:10px; font-weight:800; color:var(--slate-500); letter-spacing:.02em; margin-top:1px}
+  .thresh-opt.on{background:#fff; color:var(--blue); box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .thresh-opt.on small{color:#2563eb}
 
   /* swipe-reveal card (WeatherNext pattern): icon-only action bar, card slides over it.
      On desktop the card doesn't slide (would clip the name) — the bar overlays the right edge. */
@@ -177,18 +194,47 @@
 
   .card-body{padding:0 16px 14px}
   .stat-row{display:flex; gap:10px; margin-bottom:12px}
-  .stat{flex:1; border-radius:12px; padding:11px 8px; text-align:center}
+  .stat{
+    flex:1; border-radius:12px; padding:11px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
   .stat.rain{background:#eff6ff}
   .stat.days{background:#ecfdf5}
-  .stat .n{font-size:23px; font-weight:900; line-height:1; letter-spacing:-.02em}
+  .stat .n{font-size:30px; font-weight:900; line-height:1; letter-spacing:-.02em; flex:none}
   .stat.rain .n{color:var(--blue)}
   .stat.days .n{color:#047857}
-  .stat .l{font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; margin-top:5px; color:var(--slate-500)}
+  .stat .l{font-size:15px; font-weight:900; line-height:1.25; min-width:0}
+  .stat.rain .l{color:#1d4ed8}
+  .stat.days .l{color:#047857}
+  .stat .su{font-size:14px; font-weight:900; margin-left:2px; opacity:.85}
 
   /* 14-day mini bar strip */
+  /* dry-spell tracker (flowering-induction signal) */
+  .dry-wrap{background:#fffbeb; border:1px solid #fef3c7; border-radius:12px; padding:11px 12px 12px; margin-bottom:12px}
+  .dry-cap{font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:#b45309; margin-bottom:9px}
+  .dry-row{display:flex; gap:10px}
+  .dry-stat{
+    flex:1; background:#fff; border:1px solid #fde68a; border-radius:10px;
+    padding:11px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .dry-stat.hot{background:#fff7ed; border-color:#fdba74}
+  .dry-n{font-size:30px; font-weight:900; line-height:1; color:#c2410c; letter-spacing:-.02em; flex:none}
+  .dry-stat.hot .dry-n{color:#ea580c}
+  .dry-u{font-size:14px; font-weight:900; margin-left:2px}
+  .dry-l{font-size:15px; font-weight:900; color:#92400e; line-height:1.25; min-width:0}
+  .dry-range{display:block; font-size:11px; font-weight:700; color:#b45309; letter-spacing:0; margin-top:2px}
+
+  /* Delta-T trendline (historical spray-condition reference) */
+  .dt-wrap{background:var(--slate-50); border:1px solid var(--slate-100); border-radius:12px; padding:10px 12px 8px; margin-bottom:12px}
+  .dt-cap{font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:var(--slate-600); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center}
+  .dt-now{font-weight:800; color:#4f46e5; text-transform:none; letter-spacing:0}
+  .dt-svg{display:block; width:100%; height:70px}
+  .dt-axis{display:flex; justify-content:space-between; font-size:9px; font-weight:700; color:var(--slate-400); margin-top:2px}
+  .dt-ref{font-size:11px; font-weight:700; color:var(--slate-600); margin-top:7px; line-height:1.45}
+
   .mini-wrap{background:var(--slate-50); border:1px solid var(--slate-100); border-radius:12px; padding:10px 12px 8px; margin-bottom:12px}
-  .mini-cap{font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; color:var(--slate-500); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center}
-  .mini-cap .mx{font-weight:700; color:var(--slate-400); text-transform:none; letter-spacing:0}
+  .mini-cap{font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:var(--slate-600); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center}
+  .mini-cap .mx{font-weight:800; color:var(--slate-600); text-transform:none; letter-spacing:0}
   .mini-bars{display:flex; align-items:flex-end; gap:3px; height:46px}
   .mini-col{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%}
   .mini-bar{width:100%; min-height:2px; border-radius:3px 3px 0 0; background:#bfdbfe}
@@ -206,9 +252,9 @@
   .month-track{flex:1; height:8px; background:var(--slate-100); border-radius:5px; overflow:hidden}
   .month-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,#38bdf8 0%,#1d4ed8 100%)}
   .month-mm{font-size:13px; font-weight:900; color:var(--blue); width:62px; text-align:right; flex:none; font-variant-numeric:tabular-nums}
-  .month-days{font-size:10px; font-weight:700; color:var(--slate-400); width:34px; text-align:right; flex:none}
+  .month-days{font-size:12px; font-weight:900; color:#047857; width:40px; text-align:right; flex:none; font-variant-numeric:tabular-nums}
   .month-partial{color:#c8842b; font-weight:900; margin-left:2px}
-  .month-note{font-size:10px; font-weight:600; color:var(--slate-400); margin-top:8px; line-height:1.4}
+  .month-note{font-size:11px; font-weight:700; color:var(--slate-600); margin-top:8px; line-height:1.45}
 
   .btn-row{display:flex; gap:8px}
   .act{
@@ -276,7 +322,10 @@
   }
   @media(max-width:380px){
     .h-title h1{font-size:18px}
-    .stat .n{font-size:20px}
+    .stat .n, .dry-n{font-size:25px}
+    .stat .l, .dry-l{font-size:13px}
+    .stat{padding:10px 12px}
+    .dry-stat{padding:10px 12px}
   }
 </style>
 </head>
@@ -309,6 +358,13 @@
 </header>
 
 <main>
+  <div class="thresh-toggle" id="threshToggle" style="display:none">
+    <span class="thresh-label" id="t-thresh-label">有雨天数标准</span>
+    <div class="thresh-seg">
+      <button class="thresh-opt" id="thresh-1" onclick="setThresh(1.0)"></button>
+      <button class="thresh-opt" id="thresh-25" onclick="setThresh(2.5)"></button>
+    </div>
+  </div>
   <div class="loc-list" id="locList"></div>
 </main>
 
@@ -357,13 +413,17 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="xlsx.full.min.js"></script>
+<script src="html2canvas.min.js"></script>
 <script>
 const NS="rainlog";
 const KEY=NS+".locations";
 const CACHEKEY=NS+".cache";
 const BINKEY=NS+".bin";
 const LANGKEY=NS+".lang";
+const THRESHKEY=NS+".thresh";
+// "Rainy day" threshold (mm). 1.0 = WMO/official standard; 2.5 = agricultural "useful rain".
+let RAIN_DAY_MM=parseFloat(localStorage.getItem(THRESHKEY))||1.0;
 let lang=localStorage.getItem(LANGKEY)||"zh";
 let locations=loadLoc();
 let cache=loadCache();
@@ -376,14 +436,15 @@ function loadBin(){try{return JSON.parse(localStorage.getItem(BINKEY))||[]}catch
 function saveBin(){localStorage.setItem(BINKEY,JSON.stringify(bin))}
 const T={
   zh:{
-    title:"雨量记录", sub:"过去 92 天 · RAINLOG",
+    title:"雨量记录", sub:"近 3 个月雨量 · RAINLOG",
     attrib:"数据来源：Open-Meteo",
     add:"添加", sheetTitle:"添加地点", sheetDesc:"为地点命名，然后输入坐标或使用 GPS 定位。",
     lName:"地点名称 / NAME", lCoords:"坐标 纬度 / 经度", gps:"使用我的 GPS 定位",
     cancel:"取消", save:"保存",
     emptyT:"还没有地点", emptyD:"点击右上角的「＋ 添加」按钮，开始记录雨量。",
     get:"查询雨量", reget:"重新查询", xls:"导出 Excel",
-    total:"总降雨量", rainy:"有雨天数", days92:"92 天", daysCovered:"涵盖天数", daysMissing:"缺失天数",
+    total:"总降雨量", rainy:"有雨天数", daysTotal:"总天数", daysCovered:"涵盖天数", daysMissing:"缺失天数",
+    threshLabel:"有雨天数标准", threshOfficial:"官方", threshOfficialSub:"≥1mm", threshUseful:"有效雨", threshUsefulSub:"≥2.5mm",
     loading:"查询中…", loaded:n=>`已更新 · ${n} 天数据`, cached:"已保存的数据 · 可重新查询更新",
     errFetch:"查询失败，请检查网络后重试。",
     needName:"请输入地点名称。", needCoords:"请输入有效坐标。",
@@ -394,23 +455,26 @@ const T={
     binTitle:"回收站", binDesc:"还原已删除的地点，或永久删除。", binEmpty:"回收站是空的", restore:"还原", purge:"永久删除",
     recycleTab:"回收站", backToAdd:"返回添加",
     confirmPurge:n=>`永久删除「${n}」？此操作无法复原。`,
-    colDate:"日期", colWeek:"星期", colMM:"降雨量 (mm)",
-    sumLabel:"汇总", sheetName:"过去92天雨量",
+    colDate:"日期", colWeek:"星期", colMM:"降雨量 (mm)", colDT:"Delta-T (°C)",
+    sumLabel:"汇总", sheetName:"每日雨量",
     last14:"近 14 天", maxLabel:n=>`最高 ${n} mm`, byMonth:"按月统计", monthSheet:"按月汇总",
+    dryTitle:"连续干旱（诱花参考）", dryCurrent:"当前连旱", dryLongest:"最长连旱", dayUnit:"天",
+    dtTitle:"Delta-T 趋势（近14天 · 中午12–3点）", dtLatest:"最新", dtRef:"参考：2–8 适宜喷药，8–10 临界，>10 蒸发过快，<2 太潮湿。此为历史记录，非实时建议。",
     partialNote:"* 该月数据不完整（仅部分日期）。",
     colMonth:"月份", colMonthMM:"月降雨量 (mm)", colMonthDays:"有雨天数",
     monthNames:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
     week:["周日","周一","周二","周三","周四","周五","周六"]
   },
   en:{
-    title:"RainLog", sub:"PAST 92 DAYS · 雨量记录",
+    title:"RainLog", sub:"LAST 3 MONTHS · 雨量记录",
     attrib:"Data: Open-Meteo",
     add:"Add", sheetTitle:"Add location", sheetDesc:"Name the spot, then enter coordinates or use GPS.",
     lName:"LOCATION NAME / 名称", lCoords:"COORDINATES LAT / LNG", gps:"Use my GPS location",
     cancel:"Cancel", save:"Save",
     emptyT:"No locations yet", emptyD:"Tap the “＋ Add” button in the top-right to start logging rainfall.",
     get:"Get rainfall", reget:"Refresh", xls:"Export Excel",
-    total:"Total rainfall", rainy:"Rainy days", days92:"92 days", daysCovered:"Days covered", daysMissing:"Days missing",
+    total:"Total rainfall", rainy:"Rainy days", daysTotal:"Total days", daysCovered:"Days covered", daysMissing:"Days missing",
+    threshLabel:"Rainy-day basis", threshOfficial:"Official", threshOfficialSub:"≥1mm", threshUseful:"Useful", threshUsefulSub:"≥2.5mm",
     loading:"Loading…", loaded:n=>`Updated · ${n} days`, cached:"Saved data · refresh to update",
     errFetch:"Fetch failed. Check your connection and retry.",
     needName:"Please enter a location name.", needCoords:"Please enter valid coordinates.",
@@ -421,9 +485,11 @@ const T={
     binTitle:"Recycle bin", binDesc:"Restore deleted locations, or remove them for good.", binEmpty:"Recycle bin is empty", restore:"Restore", purge:"Delete forever",
     recycleTab:"Recycle bin", backToAdd:"Back to add",
     confirmPurge:n=>`Permanently delete “${n}”? This cannot be undone.`,
-    colDate:"Date", colWeek:"Day", colMM:"Rainfall (mm)",
-    sumLabel:"Summary", sheetName:"Rainfall_92d",
+    colDate:"Date", colWeek:"Day", colMM:"Rainfall (mm)", colDT:"Delta-T (°C)",
+    sumLabel:"Summary", sheetName:"Daily_rainfall",
     last14:"Last 14 days", maxLabel:n=>`max ${n} mm`, byMonth:"By month", monthSheet:"By_month",
+    dryTitle:"Dry spell (flowering signal)", dryCurrent:"Current dry streak", dryLongest:"Longest dry spell", dayUnit:"d",
+    dtTitle:"Delta-T trend (last 14d · midday 12–3pm)", dtLatest:"latest", dtRef:"Reference: 2–8 good to spray, 8–10 marginal, >10 too evaporative, <2 too humid. Historical record, not live advice.",
     partialNote:"* Partial month (only some days available).",
     colMonth:"Month", colMonthMM:"Monthly rainfall (mm)", colMonthDays:"Rainy days",
     monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
@@ -481,10 +547,12 @@ function render(){
       </div>
       <div class="card-body">
         ${has?`<div class="stat-row">
-          <div class="stat rain"><div class="n tabular">${c.total.toFixed(1)}</div><div class="l">${tr("total")} (mm)</div></div>
-          <div class="stat days"><div class="n tabular">${c.rainy}</div><div class="l">${tr("rainy")}</div></div>
+          <div class="stat rain"><div class="l">${tr("total")}</div><div class="n tabular">${displayTotal(c.days).toFixed(1)}<span class="su">mm</span></div></div>
+          <div class="stat days"><div class="l">${tr("rainy")}</div><div class="n tabular">${rainyCount(c.days)}</div></div>
         </div>
+        ${dryStreakHTML(c.days)}
         ${miniChartHTML(c.days)}
+        ${deltaTHTML(c.days)}
         ${monthRollupHTML(c.days)}`:``}
         <div class="btn-row">
           <button class="act act-get" id="ld-${loc.id}" onclick="getRain('${loc.id}')">
@@ -501,8 +569,85 @@ function render(){
       </div>
     </div>`;
   }).join("");
+  renderThreshToggle();
+}
+/* show toggle only when at least one farm has data; reflect current threshold + language */
+function renderThreshToggle(){
+  const box=document.getElementById("threshToggle");
+  if(!box) return;
+  const anyData=locations.some(l=>cache[l.id]&&cache[l.id].days&&cache[l.id].days.length);
+  box.style.display = anyData ? "" : "none";
+  const o1=document.getElementById("thresh-1"), o25=document.getElementById("thresh-25");
+  if(o1) o1.innerHTML=`${tr("threshOfficial")}<small>${tr("threshOfficialSub")}</small>`;
+  if(o25) o25.innerHTML=`${tr("threshUseful")}<small>${tr("threshUsefulSub")}</small>`;
+  if(o1) o1.classList.toggle("on", RAIN_DAY_MM===1.0);
+  if(o25) o25.classList.toggle("on", RAIN_DAY_MM===2.5);
+  const lab=document.getElementById("t-thresh-label"); if(lab) lab.textContent=tr("threshLabel");
+}
+function setThresh(v){
+  RAIN_DAY_MM=v;
+  localStorage.setItem(THRESHKEY, String(v));
+  render();
 }
 function esc(s){return(s+"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+
+/* live count of rainy days from cached daily data, using the current threshold */
+function rainyCount(days){
+  return days.filter(d=>d.mm!=null && d.mm>=RAIN_DAY_MM).length;
+}
+
+/* dry-spell analysis: a "dry day" = below the chosen rainy threshold.
+   Returns current ongoing streak (up to the last day) and the longest spell. */
+function drySpells(days){
+  // known days only, in chronological order
+  const seq=days.filter(d=>d.mm!=null);
+  let longest=0, longestEnd=-1, run=0;
+  for(let i=0;i<seq.length;i++){
+    if(seq[i].mm<RAIN_DAY_MM){ run++; if(run>longest){longest=run; longestEnd=i;} }
+    else run=0;
+  }
+  // current streak = dry days at the very end of the sequence
+  let cur=0;
+  for(let i=seq.length-1;i>=0;i--){ if(seq[i].mm<RAIN_DAY_MM) cur++; else break; }
+  let longestRange=null;
+  if(longest>0 && longestEnd>=0){
+    longestRange={start:seq[longestEnd-longest+1].date, end:seq[longestEnd].date};
+  }
+  let currentRange=null;
+  if(cur>0){
+    currentRange={start:seq[seq.length-cur].date, end:seq[seq.length-1].date};
+  }
+  return {current:cur, longest, longestRange, currentRange};
+}
+function fmtMD(dateStr){               // "2026-05-03" -> "3/5" (dd/mm, Malaysian)
+  const m=parseInt(dateStr.slice(5,7),10), d=parseInt(dateStr.slice(8,10),10);
+  return d+"/"+m;
+}
+/* single date for a 1-day spell, range otherwise */
+function spellDates(range){
+  if(!range) return "";
+  return range.start===range.end ? fmtMD(range.start) : `${fmtMD(range.start)}–${fmtMD(range.end)}`;
+}
+function dryStreakHTML(days){
+  const s=drySpells(days);
+  if(s.longest===0) return ""; // no dry days at all in window — nothing to show
+  const curHot = s.current>=5;   // 5+ ongoing dry days = induction signal worth highlighting
+  const longTxt = spellDates(s.longestRange);
+  const curTxt = spellDates(s.currentRange);
+  return `<div class="dry-wrap">
+    <div class="dry-cap">${tr("dryTitle")}</div>
+    <div class="dry-row">
+      <div class="dry-stat">
+        <div class="dry-l">${tr("dryLongest")}${longTxt?`<span class="dry-range">${longTxt}</span>`:""}</div>
+        <div class="dry-n tabular">${s.longest}<span class="dry-u">${tr("dayUnit")}</span></div>
+      </div>
+      <div class="dry-stat ${curHot?"hot":""}">
+        <div class="dry-l">${tr("dryCurrent")}${curTxt?`<span class="dry-range">${curTxt}</span>`:""}</div>
+        <div class="dry-n tabular">${s.current}<span class="dry-u">${tr("dayUnit")}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
 
 /* aggregate daily records into months (chronological) */
 function monthlyAgg(days){
@@ -512,9 +657,14 @@ function monthlyAgg(days){
     if(!map.has(key)) map.set(key,{key,mm:0,rainy:0,known:0,total:0});
     const o=map.get(key);
     o.total++;
-    if(d.mm!=null){ o.mm+=d.mm; o.known++; if(d.mm>=0.1) o.rainy++; }
+    if(d.mm!=null){ o.mm+=d.mm; o.known++; if(d.mm>=RAIN_DAY_MM) o.rainy++; }
   });
   return [...map.values()].sort((a,b)=>a.key<b.key?-1:1);
+}
+/* total shown to the user = sum of the monthly figures AS DISPLAYED (each rounded to 0.1),
+   so the headline always equals what the farmer adds up from the monthly rows. */
+function displayTotal(days){
+  return monthlyAgg(days).reduce((a,m)=>a+Math.round(m.mm*10)/10, 0);
 }
 function monthLabel(key){
   const m=parseInt(key.slice(5,7),10);
@@ -532,7 +682,7 @@ function miniChartHTML(days){
       return `<div class="mini-col"><div class="mini-bar nodata" style="height:8%"></div></div>`;
     }
     const h=Math.max(2,Math.round((d.mm/max)*100));
-    const cls=d.mm>=0.1?"wet":"dry";
+    const cls=d.mm>=RAIN_DAY_MM?"wet":"dry";
     return `<div class="mini-col"><div class="mini-bar ${cls}" style="height:${h}%"></div></div>`;
   }).join("");
   const first=last[0].date.slice(5).replace("-","/");
@@ -541,6 +691,37 @@ function miniChartHTML(days){
     <div class="mini-cap"><span>${tr("last14")}</span><span class="mx">${tr("maxLabel")(max.toFixed(1))}</span></div>
     <div class="mini-bars">${bars}</div>
     <div class="mini-axis"><span>${first}</span><span>${lastD}</span></div>
+  </div>`;
+}
+
+/* 14-day Delta-T trendline (historical, neutral — no spray verdict bands).
+   Shows the daily worst (highest) Delta-T in the 12–15h window. */
+function deltaTHTML(days){
+  const last=days.slice(-14);
+  const pts=last.map((d,i)=>({i,date:d.date,dt:d.dt}));
+  const known=pts.filter(p=>p.dt!=null);
+  if(known.length<2) return ""; // not enough Delta-T data to draw a trend
+  const W=300, H=70, padX=4, padY=8;
+  const vals=known.map(p=>p.dt);
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  if(hi-lo<2){ const mid=(hi+lo)/2; lo=mid-1; hi=mid+1; } // avoid flat-line cramming
+  const n=last.length;
+  const x=i=> padX + (n<=1?0:(i/(n-1))*(W-2*padX));
+  const y=v=> padY + (1-(v-lo)/(hi-lo))*(H-2*padY);
+  // polyline only across known points (skip gaps)
+  const segPts=known.map(p=>`${x(p.i).toFixed(1)},${y(p.dt).toFixed(1)}`).join(" ");
+  const dots=known.map(p=>`<circle cx="${x(p.i).toFixed(1)}" cy="${y(p.dt).toFixed(1)}" r="2.4" fill="#6366f1"/>`).join("");
+  const first=last[0].date.slice(5).replace("-","/");
+  const lastD=last[last.length-1].date.slice(5).replace("-","/");
+  const latest=known[known.length-1].dt;
+  return `<div class="dt-wrap">
+    <div class="dt-cap"><span>${tr("dtTitle")}</span><span class="dt-now">${tr("dtLatest")} ${latest.toFixed(1)}°</span></div>
+    <svg class="dt-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline fill="none" stroke="#6366f1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${segPts}"/>
+      ${dots}
+    </svg>
+    <div class="dt-axis"><span>${first}</span><span>${lastD}</span></div>
+    <div class="dt-ref">${tr("dtRef")}</div>
   </div>`;
 }
 
@@ -695,16 +876,67 @@ function switchTab(tab){
 }
 
 /* ===== share (placeholder hook — content TBD) ===== */
-function shareLoc(id){
+async function shareLoc(id){
   const loc=locations.find(l=>l.id===id); if(!loc) return;
   if(swipeCurrentId) closeCardActions(swipeCurrentId);
   const c=cache[id];
-  // TODO: finalize WhatsApp message content in next round.
-  let msg=`${loc.name}\n${(+loc.lat).toFixed(4)}, ${(+loc.lng).toFixed(4)}`;
-  if(c&&c.days&&c.days.length){
-    msg+=`\n${tr("total")}: ${c.total.toFixed(1)} mm / ${c.days.length}${lang==="zh"?"天":"d"}`;
+  const card=document.getElementById("content-"+id);
+
+  // text fallback used when image sharing isn't available
+  const textMsg=()=>{
+    let m=`🌧️ ${loc.name}`;
+    if(c&&c.days&&c.days.length){
+      m+=`\n${tr("total")}: ${displayTotal(c.days).toFixed(1)} mm`;
+      m+=`\n${tr("rainy")}: ${rainyCount(c.days)} ${tr("dayUnit")}`;
+    }
+    m+=`\n${tr("attrib")}`;
+    return m;
+  };
+
+  // No data yet, or capture lib missing -> just share text
+  if(!c||!c.days||!c.days.length||typeof html2canvas==="undefined"){
+    window.open("https://wa.me/?text="+encodeURIComponent(textMsg()),"_blank");
+    return;
   }
-  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+
+  const grip=card.querySelector(".grip");
+  const btnRow=card.querySelector(".btn-row");
+  const statusEl=card.querySelector(".card-status");
+  // hide interactive bits that shouldn't appear in a shared snapshot
+  if(grip) grip.style.visibility="hidden";
+  if(btnRow) btnRow.style.display="none";
+  if(statusEl) statusEl.style.display="none";
+
+  try{
+    const canvas=await html2canvas(card,{backgroundColor:"#ffffff",scale:2,useCORS:true,logging:false});
+    // restore UI immediately
+    if(grip) grip.style.visibility="";
+    if(btnRow) btnRow.style.display="";
+    if(statusEl) statusEl.style.display="";
+
+    const blob=await new Promise(res=>canvas.toBlob(res,"image/png"));
+    if(!blob) throw new Error("no blob");
+    const safe=loc.name.replace(/[\\\/:*?"<>|]/g,"_");
+    const file=new File([blob],`${safe}_rainlog.png`,{type:"image/png"});
+
+    // Preferred path: native share sheet WITH the image file -> farmer picks WhatsApp
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:loc.name, text:textMsg()});
+      return;
+    }
+    // Fallback: download the image so the farmer can attach it manually
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=file.name; document.body.appendChild(a); a.click();
+    a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){
+    // restore + final fallback to text share
+    if(grip) grip.style.visibility="";
+    if(btnRow) btnRow.style.display="";
+    if(statusEl) statusEl.style.display="";
+    if(e && e.name==="AbortError") return; // user cancelled the share sheet — do nothing
+    window.open("https://wa.me/?text="+encodeURIComponent(textMsg()),"_blank");
+  }
 }
 
 /* ===== swipe-reveal + right-click (bar slides in, card stays put) ===== */
@@ -762,6 +994,19 @@ function ymd(d){
   const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${dd}`;
 }
+/* Delta-T (°C) = dry-bulb − wet-bulb, from air temp (°C) and relative humidity (%).
+   Wet-bulb via Stull (2011) empirical approximation — accurate for normal field conditions.
+   Spray-band reference: 2–8 ideal, 8–10 marginal, >10 too evaporative, <2 too humid. */
+function deltaT(T, RH){
+  if(T==null||RH==null) return null;
+  RH=Math.max(1,Math.min(100,RH));
+  const Tw = T*Math.atan(0.151977*Math.sqrt(RH+8.313659))
+           + Math.atan(T+RH) - Math.atan(RH-1.676331)
+           + 0.00391838*Math.pow(RH,1.5)*Math.atan(0.023101*RH)
+           - 4.686035;
+  const d = T - Tw;
+  return (isFinite(d) && d>=0) ? d : null;
+}
 async function getRain(id){
   const loc=locations.find(l=>l.id===id); if(!loc) return;
   const btn=document.getElementById("ld-"+id);
@@ -791,30 +1036,58 @@ async function getRain(id){
 
     // 1) Archive (ERA5) — gap-free for older days, lags ~5 days behind today.
     const archiveUrl=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lng}`
-      +`&start_date=${startStr}&end_date=${endStr}&daily=precipitation_sum&timezone=auto`;
+      +`&start_date=${startStr}&end_date=${endStr}&daily=precipitation_sum`
+      +`&hourly=temperature_2m,relative_humidity_2m&timezone=auto`;
     // 2) Forecast past_days — covers the recent tail the archive hasn't filled yet.
     const fcUrl=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}`
-      +`&daily=precipitation_sum&past_days=92&forecast_days=0&timezone=auto`;
+      +`&daily=precipitation_sum&hourly=temperature_2m,relative_humidity_2m`
+      +`&past_days=92&forecast_days=0&timezone=auto`;
+
+    // hourly Delta-T accumulation: date -> highest Delta-T found in its 12:00–15:00 window
+    const dtMap=new Map();
+    const applyHourly=(times,temps,rhs)=>{
+      if(!times) return;
+      times.forEach((t,i)=>{
+        const hr=parseInt(t.slice(11,13),10);       // "2026-05-03T13:00" -> 13
+        if(hr<12 || hr>15) return;                  // only the 12:00–15:00 spray-risk window
+        const T=temps?temps[i]:null, RH=rhs?rhs[i]:null;
+        if(T==null||RH==null||isNaN(T)||isNaN(RH)) return;
+        const dt=deltaT(T,RH);
+        if(dt==null) return;
+        const day=t.slice(0,10);
+        const prev=dtMap.get(day);
+        if(prev==null || dt>prev) dtMap.set(day, dt);  // keep the worst (highest) of the window
+      });
+    };
 
     let archiveOk=false, fcOk=false;
     // Archive first (bulk of the window)
     try{
       const ar=await fetch(archiveUrl);
-      if(ar.ok){ const aj=await ar.json(); apply(aj.daily?.time, aj.daily?.precipitation_sum); archiveOk=true; }
+      if(ar.ok){ const aj=await ar.json();
+        apply(aj.daily?.time, aj.daily?.precipitation_sum);
+        applyHourly(aj.hourly?.time, aj.hourly?.temperature_2m, aj.hourly?.relative_humidity_2m);
+        archiveOk=true; }
     }catch(_){}
     // Forecast second — overwrites recent days with fresher operational values
     try{
       const fr=await fetch(fcUrl);
-      if(fr.ok){ const fj=await fr.json(); apply(fj.daily?.time, fj.daily?.precipitation_sum); fcOk=true; }
+      if(fr.ok){ const fj=await fr.json();
+        apply(fj.daily?.time, fj.daily?.precipitation_sum);
+        applyHourly(fj.hourly?.time, fj.hourly?.temperature_2m, fj.hourly?.relative_humidity_2m);
+        fcOk=true; }
     }catch(_){}
 
     if(!archiveOk && !fcOk) throw new Error("both sources failed");
 
-    // Build chronological day list (mm may be null = no data)
-    const days=[...merged.keys()].sort().map(date=>({date, mm:merged.get(date)}));
+    // Build chronological day list (mm may be null = no data; dt may be null = no reading)
+    const days=[...merged.keys()].sort().map(date=>({
+      date, mm:merged.get(date),
+      dt:(dtMap.has(date)?Math.round(dtMap.get(date)*10)/10:null)
+    }));
     const known=days.filter(d=>d.mm!=null);
     const total=known.reduce((a,b)=>a+b.mm,0);
-    const rainy=known.filter(d=>d.mm>=0.1).length;
+    const rainy=known.filter(d=>d.mm>=RAIN_DAY_MM).length;
     const missing=days.length-known.length;
 
     cache[id]={days,total,rainy,missing,stale:false,fetched:Date.now()};
@@ -830,10 +1103,10 @@ function exportXLS(id){
   const c=cache[id];
   if(!loc||!c||!c.days){alert(tr("xlNoData")); return}
   const wk=tr("week");
-  const header=[tr("colDate"),tr("colWeek"),tr("colMM")];
+  const header=[tr("colDate"),tr("colWeek"),tr("colMM"),tr("colDT")];
   const rows=c.days.map(d=>{
     const dt=new Date(d.date+"T00:00:00");
-    return [d.date,wk[dt.getDay()],(d.mm==null?"—":Number(d.mm.toFixed(1)))];
+    return [d.date,wk[dt.getDay()],(d.mm==null?"—":Number(d.mm.toFixed(1))),(d.dt==null?"—":Number(d.dt.toFixed(1)))];
   });
   const knownCount=c.days.filter(d=>d.mm!=null).length;
   const aoa=[
@@ -844,13 +1117,14 @@ function exportXLS(id){
     ...rows,
     [],
     [tr("sumLabel"),"",""],
-    [tr("total")+" (mm)","",Number(c.total.toFixed(1))],
-    [tr("rainy"),"",c.rainy],
+    [tr("total")+" (mm)","",Number(displayTotal(c.days).toFixed(1))],
+    [tr("rainy")+` (>=${RAIN_DAY_MM}mm)`,"",rainyCount(c.days)],
+    [tr("daysTotal"),"",c.days.length],
     [tr("daysCovered"),"",knownCount]
   ];
   if(c.missing>0) aoa.push([tr("daysMissing"),"",c.missing]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"]=[{wch:16},{wch:9},{wch:14}];
+  ws["!cols"]=[{wch:16},{wch:9},{wch:14},{wch:12}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,tr("sheetName"));
 
@@ -881,6 +1155,10 @@ window.addEventListener("load",()=>{
     const b=document.getElementById("boot-screen");
     if(b){b.style.opacity="0"; setTimeout(()=>b.remove(),420)}
   },650);
+  // register service worker for offline use (silently ignore if unsupported)
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
 });
 </script>
 </body>
