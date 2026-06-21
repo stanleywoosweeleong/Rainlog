@@ -194,6 +194,7 @@
   .mini-bar{width:100%; min-height:2px; border-radius:3px 3px 0 0; background:#bfdbfe}
   .mini-bar.wet{background:linear-gradient(180deg,#38bdf8 0%,#1d4ed8 100%)}
   .mini-bar.dry{background:var(--slate-200)}
+  .mini-bar.nodata{background:repeating-linear-gradient(45deg,var(--slate-100),var(--slate-100) 2px,#fff 2px,#fff 4px); border:1px dashed var(--slate-200)}
   .mini-axis{display:flex; justify-content:space-between; font-size:9px; font-weight:700; color:var(--slate-400); margin-top:5px}
 
   /* monthly rollup */
@@ -206,6 +207,8 @@
   .month-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,#38bdf8 0%,#1d4ed8 100%)}
   .month-mm{font-size:13px; font-weight:900; color:var(--blue); width:62px; text-align:right; flex:none; font-variant-numeric:tabular-nums}
   .month-days{font-size:10px; font-weight:700; color:var(--slate-400); width:34px; text-align:right; flex:none}
+  .month-partial{color:#c8842b; font-weight:900; margin-left:2px}
+  .month-note{font-size:10px; font-weight:600; color:var(--slate-400); margin-top:8px; line-height:1.4}
 
   .btn-row{display:flex; gap:8px}
   .act{
@@ -380,7 +383,7 @@ const T={
     cancel:"取消", save:"保存",
     emptyT:"还没有地点", emptyD:"点击右上角的「＋ 添加」按钮，开始记录雨量。",
     get:"查询雨量", reget:"重新查询", xls:"导出 Excel",
-    total:"总降雨量", rainy:"有雨天数", days92:"92 天",
+    total:"总降雨量", rainy:"有雨天数", days92:"92 天", daysCovered:"涵盖天数", daysMissing:"缺失天数",
     loading:"查询中…", loaded:n=>`已更新 · ${n} 天数据`, cached:"已保存的数据 · 可重新查询更新",
     errFetch:"查询失败，请检查网络后重试。",
     needName:"请输入地点名称。", needCoords:"请输入有效坐标。",
@@ -394,6 +397,7 @@ const T={
     colDate:"日期", colWeek:"星期", colMM:"降雨量 (mm)",
     sumLabel:"汇总", sheetName:"过去92天雨量",
     last14:"近 14 天", maxLabel:n=>`最高 ${n} mm`, byMonth:"按月统计", monthSheet:"按月汇总",
+    partialNote:"* 该月数据不完整（仅部分日期）。",
     colMonth:"月份", colMonthMM:"月降雨量 (mm)", colMonthDays:"有雨天数",
     monthNames:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
     week:["周日","周一","周二","周三","周四","周五","周六"]
@@ -406,7 +410,7 @@ const T={
     cancel:"Cancel", save:"Save",
     emptyT:"No locations yet", emptyD:"Tap the “＋ Add” button in the top-right to start logging rainfall.",
     get:"Get rainfall", reget:"Refresh", xls:"Export Excel",
-    total:"Total rainfall", rainy:"Rainy days", days92:"92 days",
+    total:"Total rainfall", rainy:"Rainy days", days92:"92 days", daysCovered:"Days covered", daysMissing:"Days missing",
     loading:"Loading…", loaded:n=>`Updated · ${n} days`, cached:"Saved data · refresh to update",
     errFetch:"Fetch failed. Check your connection and retry.",
     needName:"Please enter a location name.", needCoords:"Please enter valid coordinates.",
@@ -420,6 +424,7 @@ const T={
     colDate:"Date", colWeek:"Day", colMM:"Rainfall (mm)",
     sumLabel:"Summary", sheetName:"Rainfall_92d",
     last14:"Last 14 days", maxLabel:n=>`max ${n} mm`, byMonth:"By month", monthSheet:"By_month",
+    partialNote:"* Partial month (only some days available).",
     colMonth:"Month", colMonthMM:"Monthly rainfall (mm)", colMonthDays:"Rainy days",
     monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     week:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
@@ -504,8 +509,10 @@ function monthlyAgg(days){
   const map=new Map();
   days.forEach(d=>{
     const key=d.date.slice(0,7); // YYYY-MM
-    if(!map.has(key)) map.set(key,{key,mm:0,rainy:0});
-    const o=map.get(key); o.mm+=d.mm; if(d.mm>=0.1) o.rainy++;
+    if(!map.has(key)) map.set(key,{key,mm:0,rainy:0,known:0,total:0});
+    const o=map.get(key);
+    o.total++;
+    if(d.mm!=null){ o.mm+=d.mm; o.known++; if(d.mm>=0.1) o.rainy++; }
   });
   return [...map.values()].sort((a,b)=>a.key<b.key?-1:1);
 }
@@ -519,8 +526,11 @@ function monthLabel(key){
 function miniChartHTML(days){
   const last=days.slice(-14);
   if(!last.length) return "";
-  const max=Math.max(...last.map(d=>d.mm),1);
+  const max=Math.max(...last.map(d=>d.mm==null?0:d.mm),1);
   const bars=last.map(d=>{
+    if(d.mm==null){
+      return `<div class="mini-col"><div class="mini-bar nodata" style="height:8%"></div></div>`;
+    }
     const h=Math.max(2,Math.round((d.mm/max)*100));
     const cls=d.mm>=0.1?"wet":"dry";
     return `<div class="mini-col"><div class="mini-bar ${cls}" style="height:${h}%"></div></div>`;
@@ -541,16 +551,23 @@ function monthRollupHTML(days){
   const max=Math.max(...months.map(m=>m.mm),1);
   const rows=months.map(m=>{
     const w=Math.max(3,Math.round((m.mm/max)*100));
+    // partial if not every calendar day of that month is in our window/data
+    const dim=new Date(parseInt(m.key.slice(0,4)),parseInt(m.key.slice(5,7)),0).getDate();
+    const partial=(m.known<dim);
+    const star=partial?`<span class="month-partial" title="${tr("partialNote")}">*</span>`:"";
     return `<div class="month-row">
-      <div class="month-name">${monthLabel(m.key)}</div>
+      <div class="month-name">${monthLabel(m.key)}${star}</div>
       <div class="month-track"><div class="month-fill" style="width:${w}%"></div></div>
       <div class="month-mm tabular">${m.mm.toFixed(1)}</div>
       <div class="month-days tabular">${m.rainy}${lang==="zh"?"天":"d"}</div>
     </div>`;
   }).join("");
+  const anyPartial=months.some(m=>{const dim=new Date(parseInt(m.key.slice(0,4)),parseInt(m.key.slice(5,7)),0).getDate(); return m.known<dim;});
+  const note=anyPartial?`<div class="month-note">${tr("partialNote")}</div>`:"";
   return `<div class="month-wrap">
     <div class="month-cap">${tr("byMonth")}</div>
     ${rows}
+    ${note}
   </div>`;
 }
 let editId=null;
@@ -740,6 +757,11 @@ function toggleCardActions(id){        // the ⋯ grip button — works on every
 document.addEventListener("click",e=>{
   if(swipeCurrentId && !e.target.closest(".card-wrap")) closeCardActions(swipeCurrentId);
 });
+/* date helper: YYYY-MM-DD in local time */
+function ymd(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${dd}`;
+}
 async function getRain(id){
   const loc=locations.find(l=>l.id===id); if(!loc) return;
   const btn=document.getElementById("ld-"+id);
@@ -747,15 +769,55 @@ async function getRain(id){
   btn.disabled=true; btn.innerHTML=`<span class="spin"></span> ${tr("loading")}`;
   st.style.color="#94a3b8"; st.textContent="";
   try{
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}&daily=precipitation_sum&past_days=92&forecast_days=0&timezone=auto`;
-    const r=await fetch(url);
-    if(!r.ok) throw new Error("http "+r.status);
-    const j=await r.json();
-    const dates=j.daily.time, vals=j.daily.precipitation_sum;
-    const days=dates.map((d,i)=>({date:d,mm:(vals[i]==null?0:vals[i])}));
-    const total=days.reduce((a,b)=>a+b.mm,0);
-    const rainy=days.filter(d=>d.mm>=0.1).length;
-    cache[id]={days,total,rainy,stale:false,fetched:Date.now()};
+    // Window: first day of the month 3 months ago  ->  yesterday.
+    const now=new Date();
+    const yesterday=new Date(now); yesterday.setDate(now.getDate()-1);
+    const start=new Date(now.getFullYear(), now.getMonth()-3, 1); // 1st of 3 months ago
+    const startStr=ymd(start), endStr=ymd(yesterday);
+
+    // Merge map: date -> mm (or null if missing). Seed every day in range as null
+    // so a day absent from BOTH sources stays honestly "no data", not 0.
+    const merged=new Map();
+    for(let d=new Date(start); d<=yesterday; d.setDate(d.getDate()+1)){
+      merged.set(ymd(d), null);
+    }
+    const apply=(dates,vals)=>{
+      if(!dates) return;
+      dates.forEach((dt,i)=>{
+        const v=vals?vals[i]:null;
+        if(merged.has(dt) && v!=null && !isNaN(v)) merged.set(dt, v);
+      });
+    };
+
+    // 1) Archive (ERA5) — gap-free for older days, lags ~5 days behind today.
+    const archiveUrl=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lng}`
+      +`&start_date=${startStr}&end_date=${endStr}&daily=precipitation_sum&timezone=auto`;
+    // 2) Forecast past_days — covers the recent tail the archive hasn't filled yet.
+    const fcUrl=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}`
+      +`&daily=precipitation_sum&past_days=92&forecast_days=0&timezone=auto`;
+
+    let archiveOk=false, fcOk=false;
+    // Archive first (bulk of the window)
+    try{
+      const ar=await fetch(archiveUrl);
+      if(ar.ok){ const aj=await ar.json(); apply(aj.daily?.time, aj.daily?.precipitation_sum); archiveOk=true; }
+    }catch(_){}
+    // Forecast second — overwrites recent days with fresher operational values
+    try{
+      const fr=await fetch(fcUrl);
+      if(fr.ok){ const fj=await fr.json(); apply(fj.daily?.time, fj.daily?.precipitation_sum); fcOk=true; }
+    }catch(_){}
+
+    if(!archiveOk && !fcOk) throw new Error("both sources failed");
+
+    // Build chronological day list (mm may be null = no data)
+    const days=[...merged.keys()].sort().map(date=>({date, mm:merged.get(date)}));
+    const known=days.filter(d=>d.mm!=null);
+    const total=known.reduce((a,b)=>a+b.mm,0);
+    const rainy=known.filter(d=>d.mm>=0.1).length;
+    const missing=days.length-known.length;
+
+    cache[id]={days,total,rainy,missing,stale:false,fetched:Date.now()};
     saveCache(); render();
   }catch(e){
     btn.disabled=false;
@@ -771,8 +833,9 @@ function exportXLS(id){
   const header=[tr("colDate"),tr("colWeek"),tr("colMM")];
   const rows=c.days.map(d=>{
     const dt=new Date(d.date+"T00:00:00");
-    return [d.date,wk[dt.getDay()],Number(d.mm.toFixed(1))];
+    return [d.date,wk[dt.getDay()],(d.mm==null?"—":Number(d.mm.toFixed(1)))];
   });
+  const knownCount=c.days.filter(d=>d.mm!=null).length;
   const aoa=[
     [loc.name,"",""],
     [`${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`,"",""],
@@ -783,8 +846,9 @@ function exportXLS(id){
     [tr("sumLabel"),"",""],
     [tr("total")+" (mm)","",Number(c.total.toFixed(1))],
     [tr("rainy"),"",c.rainy],
-    [tr("days92"),"",c.days.length]
+    [tr("daysCovered"),"",knownCount]
   ];
+  if(c.missing>0) aoa.push([tr("daysMissing"),"",c.missing]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws["!cols"]=[{wch:16},{wch:9},{wch:14}];
   const wb=XLSX.utils.book_new();
@@ -795,14 +859,20 @@ function exportXLS(id){
     [loc.name,"",""],
     [],
     [tr("colMonth"),tr("colMonthMM"),tr("colMonthDays")],
-    ...months.map(m=>[monthLabel(m.key),Number(m.mm.toFixed(1)),m.rainy])
+    ...months.map(m=>{
+      const dim=new Date(parseInt(m.key.slice(0,4)),parseInt(m.key.slice(5,7)),0).getDate();
+      const label=monthLabel(m.key)+(m.known<dim?" *":"");
+      return [label,Number(m.mm.toFixed(1)),m.rainy];
+    })
   ];
+  const anyPartial=months.some(m=>{const dim=new Date(parseInt(m.key.slice(0,4)),parseInt(m.key.slice(5,7)),0).getDate(); return m.known<dim;});
+  if(anyPartial){ maoa.push([]); maoa.push([tr("partialNote"),"",""]); }
   const mws=XLSX.utils.aoa_to_sheet(maoa);
-  mws["!cols"]=[{wch:12},{wch:20},{wch:12}];
+  mws["!cols"]=[{wch:14},{wch:20},{wch:12}];
   XLSX.utils.book_append_sheet(wb,mws,tr("monthSheet"));
 
   const safe=loc.name.replace(/[\\\/:*?"<>|]/g,"_");
-  XLSX.writeFile(wb,`${safe}_92d_rain.xlsx`);
+  XLSX.writeFile(wb,`${safe}_rain.xlsx`);
 }
 Object.keys(cache).forEach(k=>{if(cache[k]) cache[k].stale=true});
 applyLang();
