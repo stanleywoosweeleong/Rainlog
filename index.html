@@ -555,6 +555,7 @@ const T={
   zh:{
     title:"雨量记录", sub:"近 3 个月雨量 · RAINLOG",
     attrib:"数据来源：Open-Meteo",
+    shCur:"当前连旱", shHot:"其中达 30°C", shNone:"目前没有连旱（昨天有雨）", shHist:"最长连旱", shFlower:"🌸 诱花时机参考", shDayUnit:"天",
     add:"添加", sheetTitle:"添加地点", sheetDesc:"为地点命名，然后输入坐标或使用 GPS 定位。",
     lName:"地点名称 / NAME", lCoords:"坐标 纬度 / 经度", gps:"使用我的 GPS 定位",
     cancel:"取消", save:"保存",
@@ -610,6 +611,7 @@ const T={
   en:{
     title:"RainLog", sub:"LAST 3 MONTHS · 雨量记录",
     attrib:"Data: Open-Meteo",
+    shCur:"Current dry streak", shHot:"of which ≥30°C", shNone:"No dry streak right now (rain yesterday)", shHist:"Longest dry spell", shFlower:"🌸 Flower-induction window", shDayUnit:"d",
     add:"Add", sheetTitle:"Add location", sheetDesc:"Name the spot, then enter coordinates or use GPS.",
     lName:"LOCATION NAME / 名称", lCoords:"COORDINATES LAT / LNG", gps:"Use my GPS location",
     cancel:"Cancel", save:"Save",
@@ -1175,12 +1177,31 @@ async function shareLoc(id){
   const c=cache[id];
   const card=document.getElementById("content-"+id);
 
-  // text fallback used when image sharing isn't available
+  // Share text is framed around the flowering-induction signal — that's why a
+  // farmer shares: an ongoing dry streak (plus heat) is the trigger to act on.
+  // We lead with the current dry streak and how many of those days hit 30°C+,
+  // not the historical totals (which aren't what excites them to share).
   const textMsg=()=>{
     let m=`🌧️ ${loc.name}`;
     if(c&&c.days&&c.days.length){
-      m+=`\n${tr("total")}: ${displayTotal(c.days).toFixed(1)} mm`;
-      m+=`\n${tr("rainy")}: ${rainyCount(c.days)} ${tr("dayUnit")}`;
+      const s=drySpells(c.days);
+      m+=`\n${tr("shFlower")}`;
+      if(s.current>0){
+        // count, within the trailing dry run, days whose high reached 30°C+
+        const seq=c.days.filter(d=>d.mm!=null);
+        const tail=seq.slice(-s.current);
+        const hot=tail.filter(d=>d.tmax!=null && d.tmax>=30).length;
+        const range=spellDates(s.currentRange);
+        m+=`\n${tr("shCur")}: ${s.current} ${tr("shDayUnit")}${range?` (${range})`:""}`;
+        m+=`\n${tr("shHot")}: ${hot} ${tr("shDayUnit")}`;
+      }else{
+        m+=`\n${tr("shNone")}`;
+        // still useful context: the longest dry spell seen in the window
+        if(s.longest>0){
+          const lr=spellDates(s.longestRange);
+          m+=`\n${tr("shHist")}: ${s.longest} ${tr("shDayUnit")}${lr?` (${lr})`:""}`;
+        }
+      }
     }
     m+=`\n${tr("attrib")}`;
     return m;
