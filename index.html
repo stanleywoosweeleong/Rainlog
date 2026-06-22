@@ -408,11 +408,11 @@
     .stat .su, .dry-u{font-size:12px}
     /* dry tiles: same two-row stack — label (+ date range) on top, number below */
     .dry-stat{
-      flex-direction:column; align-items:flex-start; justify-content:center;
+      flex-direction:column; align-items:flex-start; justify-content:space-between;
       gap:4px; padding:11px 13px;
     }
     .dry-l{font-size:13px; line-height:1.2; flex:none; width:100%}
-    .dry-n{font-size:27px; text-align:left; width:100%}
+    .dry-n{font-size:27px; text-align:left; width:100%; margin-top:auto}
   }
   @media(max-width:380px){
     .h-title h1{font-size:18px}
@@ -862,6 +862,10 @@ function dryStreakHTML(days){
   const curHot = s.current>=5;   // 5+ ongoing dry days = induction signal worth highlighting
   const longTxt = spellDates(s.longestRange);
   const curTxt = spellDates(s.currentRange);
+  // The current-streak tile always shows a second line so it lines up with the
+  // longest-spell tile (which always has a date range). When there's no ongoing
+  // dry streak (0 days), a dash holds the line; 1+ days shows the date(s).
+  const curLine = curTxt || "—";
   return `<div class="dry-wrap">
     <div class="dry-cap">${tr("dryTitle")}</div>
     <div class="dry-row">
@@ -870,7 +874,7 @@ function dryStreakHTML(days){
         <div class="dry-n tabular">${s.longest}<span class="dry-u">${tr("dayUnit")}</span></div>
       </div>
       <div class="dry-stat ${curHot?"hot":""}">
-        <div class="dry-l">${tr("dryCurrent")}${curTxt?`<span class="dry-range">${curTxt}</span>`:""}</div>
+        <div class="dry-l">${tr("dryCurrent")}<span class="dry-range">${curLine}</span></div>
         <div class="dry-n tabular">${s.current}<span class="dry-u">${tr("dayUnit")}</span></div>
       </div>
     </div>
