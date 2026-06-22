@@ -576,7 +576,7 @@ const T={
     sumLabel:"汇总", sheetName:"每日雨量",
     last14:"近 14 天", maxLabel:n=>`最高 ${n} mm`, byMonth:"按月统计", monthSheet:"按月汇总",
     dryTitle:"连续干旱（诱花参考）", dryCurrent:"当前连旱", dryLongest:"最长连旱", dayUnit:"天",
-    dtTitle:"Delta-T 趋势", dtTitleSub:"（近14天 · 中午12–3点）", dtLatest:"最新", dtAbbr:"ΔT", dtTempAbbr:"高温", dtLegendDT:"Delta-T", dtLegendTemp:"最高气温", dtRef:"参考：2–8 适宜喷药，8–10 临界，>10 蒸发过快，<2 太潮湿。此为历史记录，非实时建议。",
+    dtTitle:"Delta-T 趋势", dtTitleSub:"（近14天 · 中午12–3点）", dtLatest:"最新", dtAbbr:"ΔT", dtTempAbbr:"高温", dtLegendDT:"Delta-T", dtLegendTemp:"最高气温", dtRef:"参考：2–8 适宜喷药，8–10 临界，>10 蒸发过快，<2 太潮湿。红色虚线为 ΔT 10：高过此线那天喷药可能失效。绿色虚线为 30°C：达到或高于此线、配合干旱，有助花芽分化。此为历史记录，非实时建议。",
     partialNote:"* 该月数据不完整（仅部分日期）。",
     colMonth:"月份", colMonthMM:"月降雨量 (mm)", colMonthDays:"有雨天数",
     monthNames:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
@@ -631,7 +631,7 @@ const T={
     sumLabel:"Summary", sheetName:"Daily_rainfall",
     last14:"Last 14 days", maxLabel:n=>`max ${n} mm`, byMonth:"By month", monthSheet:"By_month",
     dryTitle:"Dry spell (flowering signal)", dryCurrent:"Current dry streak", dryLongest:"Longest dry spell", dayUnit:"d",
-    dtTitle:"Delta-T trend", dtTitleSub:"(last 14d · midday 12–3pm)", dtLatest:"latest", dtAbbr:"ΔT", dtTempAbbr:"high", dtLegendDT:"Delta-T", dtLegendTemp:"High temp", dtRef:"Reference: 2–8 good to spray, 8–10 marginal, >10 too evaporative, <2 too humid. Historical record, not live advice.",
+    dtTitle:"Delta-T trend", dtTitleSub:"(last 14d · midday 12–3pm)", dtLatest:"latest", dtAbbr:"ΔT", dtTempAbbr:"high", dtLegendDT:"Delta-T", dtLegendTemp:"High temp", dtRef:"Reference: 2–8 good to spray, 8–10 marginal, >10 too evaporative, <2 too humid. Red dashed line = ΔT 10: days above it, your spray may not work. Green dashed line = 30°C: days at or above it, paired with a dry spell, help flower induction. Historical record, not live advice.",
     partialNote:"* Partial month (only some days available).",
     colMonth:"Month", colMonthMM:"Monthly rainfall (mm)", colMonthDays:"Rainy days",
     monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
@@ -934,22 +934,49 @@ function deltaTHTML(days){
   const W=300, H=120, padX=6;
   const n=last.length;
   const x=i=> padX + (n<=1?0:(i/(n-1))*(W-2*padX));
-  // band scaler: maps a value to y within [top,bottom] using the data's own min/max
-  const bandScale=(arr,getv,top,bottom)=>{
+  // band scaler: maps a value to y within [top,bottom] using the data's own min/max.
+  // If `must` is given, the domain is widened to include it (so a reference line at
+  // that value always has a true position even when no data point reaches it).
+  const bandScale=(arr,getv,top,bottom,must)=>{
     let lo=Math.min(...arr.map(getv)), hi=Math.max(...arr.map(getv));
+    if(must!=null){ lo=Math.min(lo,must); hi=Math.max(hi,must); }
     if(hi-lo<1.5){ const mid=(hi+lo)/2; lo=mid-0.75; hi=mid+0.75; }
     return v=> top + (1-(v-lo)/(hi-lo))*(bottom-top);
   };
   // Upper band for Delta-T, lower band for temperature, with a gap between.
-  const yDT=bandScale(dtPts,p=>p.dt, 10, 52);
+  // Force the 10 threshold into the band's value domain so the dashed reference
+  // line below always sits at a true, comparable position relative to the trend.
+  const DT_THRESH=10;
+  const yDT=bandScale(dtPts,p=>p.dt, 10, 52, DT_THRESH);
   const dtLine=dtPts.map(p=>`${x(p.i).toFixed(1)},${yDT(p.dt).toFixed(1)}`).join(" ");
-  const dtDots=dtPts.map(p=>`<circle cx="${x(p.i).toFixed(1)}" cy="${yDT(p.dt).toFixed(1)}" r="2.3" fill="#6366f1"/>`).join("");
-  let tempSvg="", maxLabel="";
+  const dtDots=dtPts.map(p=>{
+    const over=p.dt>DT_THRESH;
+    return `<circle cx="${x(p.i).toFixed(1)}" cy="${yDT(p.dt).toFixed(1)}" r="${over?2.8:2.3}" fill="${over?"#dc2626":"#6366f1"}"/>`;
+  }).join("");
+  // Red dashed threshold line at ΔT=10: above it, spray evaporates too fast.
+  const yThresh=yDT(DT_THRESH);
+  // keep the label inside the band: drop it below the line if the line hugs the top
+  const lblY = yThresh < 18 ? yThresh+9 : yThresh-3;
+  const threshLine=`<line x1="0" y1="${yThresh.toFixed(1)}" x2="${W}" y2="${yThresh.toFixed(1)}" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.75"/>`
+    +`<text x="${(W-2).toFixed(1)}" y="${lblY.toFixed(1)}" text-anchor="end" font-size="8" font-weight="800" fill="#dc2626">ΔT 10</text>`;
+  let tempSvg="", maxLabel="", tThreshLine="";
   if(hasTemp){
-    const yT=bandScale(tPts,p=>p.t, 80, 108);
+    // Force 30°C into the band domain so the flower-induction reference line below
+    // always has a true position relative to the daily-high trend.
+    const TEMP_THRESH=30;
+    const yT=bandScale(tPts,p=>p.t, 80, 108, TEMP_THRESH);
     const tLine=tPts.map(p=>`${x(p.i).toFixed(1)},${yT(p.t).toFixed(1)}`).join(" ");
-    const tDots=tPts.map(p=>`<circle cx="${x(p.i).toFixed(1)}" cy="${yT(p.t).toFixed(1)}" r="2" fill="#f59e0b"/>`).join("");
+    // Days at/above 30°C favour flower induction → mark them in a deeper amber.
+    const tDots=tPts.map(p=>{
+      const hot=p.t>=TEMP_THRESH;
+      return `<circle cx="${x(p.i).toFixed(1)}" cy="${yT(p.t).toFixed(1)}" r="${hot?2.6:2}" fill="${hot?"#d97706":"#f59e0b"}"/>`;
+    }).join("");
     tempSvg=`<polyline fill="none" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${tLine}"/>${tDots}`;
+    // Green dashed reference at 30°C: at/above it, heat + dry spell eases flowering.
+    const yT30=yT(TEMP_THRESH);
+    const t30lblY = yT30 > 100 ? yT30-4 : yT30+10;   // keep label inside band
+    tThreshLine=`<line x1="0" y1="${yT30.toFixed(1)}" x2="${W}" y2="${yT30.toFixed(1)}" stroke="#059669" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.7"/>`
+      +`<text x="${(W-2).toFixed(1)}" y="${t30lblY.toFixed(1)}" text-anchor="end" font-size="8" font-weight="800" fill="#059669">30°C</text>`;
     // Daily-high value on EVERY point, horizontal and sitting above each dot.
     // Adjacent labels are staggered (alternating higher/lower) so they don't collide
     // at phone width; edge labels are anchored inward to stay inside the viewBox.
@@ -975,8 +1002,10 @@ function deltaTHTML(days){
     ${legend}
     <svg class="dt-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       ${divider}
+      ${threshLine}
       <polyline fill="none" stroke="#6366f1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${dtLine}"/>
       ${dtDots}
+      ${tThreshLine}
       ${tempSvg}
       ${maxLabel}
     </svg>
