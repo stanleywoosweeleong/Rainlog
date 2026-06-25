@@ -77,9 +77,6 @@
     cursor:pointer; flex:none; transition:transform .15s, background .15s, color .15s;
   }
   .lang-btn:active{transform:scale(.9)}
-  .lang-btn.lang-active{
-    background:#eff6ff; color:var(--blue);
-  }
   main{max-width:760px; margin:0 auto; padding:14px}
   .attrib{
     display:flex; justify-content:center;
@@ -451,7 +448,7 @@
     <button class="add-btn" id="addBtn" onclick="openSheet()" title="添加地点 Add location" aria-label="添加地点 Add location">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
-    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">中</button>
   </div>
 </header>
 
@@ -533,15 +530,14 @@ const THRESHKEY=NS+".thresh";
 // "Rainy day" threshold (mm). 1.0 = WMO/official standard; 2.5 = agricultural "useful rain".
 let RAIN_DAY_MM=parseFloat(localStorage.getItem(THRESHKEY))||1.0;
 let lang=localStorage.getItem(LANGKEY)||"zh";
-// Two-step language toggle: cycle order + each language's OWN label.
+// One-tap language toggle: cycle order + each language's OWN label (shown on the
+// button to indicate the language the UI is currently in).
 // Add more languages here later, e.g. "ms":"BM", "ta":"த".
 const LANG_CYCLE=["zh","en"];
 const LANG_LBL={zh:"中", en:"EN"};
 // QR code for sharing the app (https://stanleywoosweeleong.github.io/Rainlog/)
 const QR_N=37;
 const QR_PATH="M2 2h7v1h-7z M10 2h1v1h-1z M13 2h2v1h-2z M16 2h5v1h-5z M25 2h1v1h-1z M28 2h7v1h-7z M2 3h1v1h-1z M8 3h1v1h-1z M11 3h1v1h-1z M13 3h2v1h-2z M18 3h2v1h-2z M21 3h1v1h-1z M23 3h2v1h-2z M26 3h1v1h-1z M28 3h1v1h-1z M34 3h1v1h-1z M2 4h1v1h-1z M4 4h3v1h-3z M8 4h1v1h-1z M11 4h1v1h-1z M14 4h2v1h-2z M22 4h2v1h-2z M25 4h2v1h-2z M28 4h1v1h-1z M30 4h3v1h-3z M34 4h1v1h-1z M2 5h1v1h-1z M4 5h3v1h-3z M8 5h1v1h-1z M10 5h5v1h-5z M16 5h2v1h-2z M19 5h2v1h-2z M22 5h1v1h-1z M24 5h1v1h-1z M28 5h1v1h-1z M30 5h3v1h-3z M34 5h1v1h-1z M2 6h1v1h-1z M4 6h3v1h-3z M8 6h1v1h-1z M10 6h2v1h-2z M13 6h2v1h-2z M16 6h1v1h-1z M20 6h3v1h-3z M25 6h1v1h-1z M28 6h1v1h-1z M30 6h3v1h-3z M34 6h1v1h-1z M2 7h1v1h-1z M8 7h1v1h-1z M10 7h1v1h-1z M12 7h1v1h-1z M14 7h3v1h-3z M18 7h1v1h-1z M21 7h1v1h-1z M24 7h1v1h-1z M28 7h1v1h-1z M34 7h1v1h-1z M2 8h7v1h-7z M10 8h1v1h-1z M12 8h1v1h-1z M14 8h1v1h-1z M16 8h1v1h-1z M18 8h1v1h-1z M20 8h1v1h-1z M22 8h1v1h-1z M24 8h1v1h-1z M26 8h1v1h-1z M28 8h7v1h-7z M10 9h3v1h-3z M16 9h5v1h-5z M23 9h1v1h-1z M26 9h1v1h-1z M2 10h1v1h-1z M6 10h1v1h-1z M8 10h3v1h-3z M12 10h2v1h-2z M19 10h1v1h-1z M21 10h11v1h-11z M34 10h1v1h-1z M2 11h1v1h-1z M4 11h3v1h-3z M9 11h1v1h-1z M11 11h1v1h-1z M14 11h2v1h-2z M17 11h2v1h-2z M20 11h1v1h-1z M23 11h3v1h-3z M27 11h1v1h-1z M31 11h3v1h-3z M2 12h1v1h-1z M4 12h5v1h-5z M10 12h2v1h-2z M13 12h2v1h-2z M17 12h3v1h-3z M22 12h1v1h-1z M25 12h1v1h-1z M31 12h1v1h-1z M33 12h1v1h-1z M2 13h1v1h-1z M4 13h1v1h-1z M6 13h1v1h-1z M9 13h2v1h-2z M12 13h2v1h-2z M16 13h1v1h-1z M19 13h5v1h-5z M26 13h1v1h-1z M28 13h1v1h-1z M33 13h1v1h-1z M4 14h1v1h-1z M7 14h3v1h-3z M11 14h1v1h-1z M13 14h5v1h-5z M20 14h3v1h-3z M25 14h2v1h-2z M28 14h2v1h-2z M31 14h1v1h-1z M34 14h1v1h-1z M2 15h6v1h-6z M10 15h2v1h-2z M18 15h2v1h-2z M21 15h1v1h-1z M23 15h1v1h-1z M25 15h1v1h-1z M27 15h1v1h-1z M29 15h1v1h-1z M32 15h1v1h-1z M2 16h1v1h-1z M7 16h3v1h-3z M12 16h2v1h-2z M15 16h2v1h-2z M18 16h4v1h-4z M23 16h3v1h-3z M27 16h2v1h-2z M31 16h3v1h-3z M4 17h2v1h-2z M7 17h1v1h-1z M9 17h2v1h-2z M14 17h2v1h-2z M19 17h1v1h-1z M21 17h3v1h-3z M25 17h4v1h-4z M31 17h1v1h-1z M2 18h1v1h-1z M6 18h4v1h-4z M11 18h1v1h-1z M16 18h2v1h-2z M19 18h1v1h-1z M23 18h4v1h-4z M28 18h1v1h-1z M30 18h1v1h-1z M33 18h1v1h-1z M2 19h2v1h-2z M5 19h1v1h-1z M7 19h1v1h-1z M9 19h2v1h-2z M16 19h2v1h-2z M19 19h2v1h-2z M23 19h3v1h-3z M31 19h2v1h-2z M4 20h1v1h-1z M6 20h3v1h-3z M12 20h6v1h-6z M20 20h1v1h-1z M22 20h1v1h-1z M25 20h2v1h-2z M29 20h1v1h-1z M31 20h1v1h-1z M33 20h1v1h-1z M2 21h1v1h-1z M5 21h1v1h-1z M10 21h3v1h-3z M14 21h2v1h-2z M21 21h1v1h-1z M24 21h2v1h-2z M27 21h1v1h-1z M29 21h1v1h-1z M3 22h1v1h-1z M7 22h2v1h-2z M15 22h2v1h-2z M18 22h1v1h-1z M21 22h1v1h-1z M24 22h1v1h-1z M26 22h1v1h-1z M28 22h1v1h-1z M30 22h2v1h-2z M33 22h1v1h-1z M2 23h6v1h-6z M9 23h2v1h-2z M12 23h3v1h-3z M16 23h1v1h-1z M20 23h3v1h-3z M25 23h1v1h-1z M27 23h1v1h-1z M31 23h1v1h-1z M33 23h1v1h-1z M4 24h1v1h-1z M6 24h5v1h-5z M14 24h1v1h-1z M16 24h2v1h-2z M19 24h2v1h-2z M22 24h1v1h-1z M25 24h1v1h-1z M31 24h3v1h-3z M6 25h2v1h-2z M9 25h1v1h-1z M11 25h3v1h-3z M15 25h6v1h-6z M23 25h1v1h-1z M26 25h3v1h-3z M34 25h1v1h-1z M2 26h2v1h-2z M7 26h2v1h-2z M10 26h1v1h-1z M14 26h2v1h-2z M19 26h1v1h-1z M21 26h1v1h-1z M23 26h8v1h-8z M10 27h2v1h-2z M15 27h4v1h-4z M20 27h1v1h-1z M26 27h1v1h-1z M30 27h1v1h-1z M32 27h2v1h-2z M2 28h7v1h-7z M10 28h1v1h-1z M13 28h1v1h-1z M17 28h3v1h-3z M22 28h3v1h-3z M26 28h1v1h-1z M28 28h1v1h-1z M30 28h2v1h-2z M33 28h1v1h-1z M2 29h1v1h-1z M8 29h1v1h-1z M11 29h1v1h-1z M13 29h1v1h-1z M16 29h1v1h-1z M19 29h5v1h-5z M26 29h1v1h-1z M30 29h1v1h-1z M2 30h1v1h-1z M4 30h3v1h-3z M8 30h1v1h-1z M10 30h1v1h-1z M12 30h3v1h-3z M16 30h2v1h-2z M20 30h1v1h-1z M22 30h1v1h-1z M26 30h6v1h-6z M34 30h1v1h-1z M2 31h1v1h-1z M4 31h3v1h-3z M8 31h1v1h-1z M11 31h1v1h-1z M13 31h1v1h-1z M15 31h1v1h-1z M18 31h2v1h-2z M21 31h1v1h-1z M23 31h2v1h-2z M26 31h1v1h-1z M28 31h3v1h-3z M33 31h1v1h-1z M2 32h1v1h-1z M4 32h3v1h-3z M8 32h1v1h-1z M12 32h1v1h-1z M15 32h1v1h-1z M18 32h1v1h-1z M20 32h2v1h-2z M27 32h4v1h-4z M2 33h1v1h-1z M8 33h1v1h-1z M11 33h1v1h-1z M15 33h1v1h-1z M19 33h5v1h-5z M25 33h2v1h-2z M28 33h1v1h-1z M2 34h7v1h-7z M10 34h2v1h-2z M15 34h1v1h-1z M17 34h1v1h-1z M19 34h1v1h-1z M22 34h5v1h-5z M28 34h1v1h-1z M34 34h1v1h-1z";
-let langActive=false;       // false = at rest; true = armed/cycling
-let langIdleTimer=null;     // resets to rest after inactivity
 let locations=loadLoc();
 let cache=loadCache();
 let bin=loadBin();
@@ -668,12 +664,9 @@ const T={
 function tr(k){return T[lang][k]}
 function applyLang(){
   document.documentElement.lang=lang;
-  // At rest, show the CURRENT language's own label. While armed/cycling, leave
-  // the hint label alone so a re-render doesn't overwrite it.
-  if(!langActive){
-    const lb=document.getElementById("langBtn");
-    if(lb) lb.textContent=LANG_LBL[lang];
-  }
+  // Button always shows the language the UI is currently in.
+  const lb=document.getElementById("langBtn");
+  if(lb) lb.textContent=LANG_LBL[lang];
   const s=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
   s("t-title",tr("title")); s("t-attrib",tr("attrib"));
   s("t-sheet-title",tr("sheetTitle")); s("t-sheet-desc",tr("sheetDesc"));
@@ -683,37 +676,13 @@ function applyLang(){
   render(); renderBin(); updateBinCount();
   if(document.getElementById("guideOverlay").classList.contains("on")) renderGuide();
 }
-function langRest(){           // return button to its resting state
-  langActive=false;
-  const lb=document.getElementById("langBtn");
-  if(lb){ lb.classList.remove("lang-active"); lb.textContent=LANG_LBL[lang]; }
-  if(langIdleTimer){ clearTimeout(langIdleTimer); langIdleTimer=null; }
-}
-function langArmIdleReset(){    // reset to rest after ~2.2s of no taps
-  if(langIdleTimer) clearTimeout(langIdleTimer);
-  langIdleTimer=setTimeout(langRest, 2200);
-}
 function toggleLang(){
-  const lb=document.getElementById("langBtn");
-  if(!langActive){
-    // First tap: ARM only — highlight + hint the next language, don't switch yet.
-    langActive=true;
-    const i=LANG_CYCLE.indexOf(lang);
-    const next=LANG_CYCLE[(i+1)%LANG_CYCLE.length];
-    if(lb){ lb.classList.add("lang-active"); lb.textContent="→ "+LANG_LBL[next]; }
-    langArmIdleReset();
-    return;
-  }
-  // Subsequent taps: CYCLE to the next language and apply it.
+  // One tap = switch immediately. The button label always shows the language the
+  // UI is currently in (中 when Chinese, EN when English).
   const i=LANG_CYCLE.indexOf(lang);
   lang=LANG_CYCLE[(i+1)%LANG_CYCLE.length];
   localStorage.setItem(LANGKEY,lang);
-  applyLang();                 // re-render UI in the new language (won't clobber label; langActive=true)
-  // update the hint to the NEXT-next language
-  const j=LANG_CYCLE.indexOf(lang);
-  const next=LANG_CYCLE[(j+1)%LANG_CYCLE.length];
-  if(lb){ lb.classList.add("lang-active"); lb.textContent="→ "+LANG_LBL[next]; }
-  langArmIdleReset();
+  applyLang();   // re-renders the UI and refreshes the button label
 }
 
 /* ===== user guide ===== */
